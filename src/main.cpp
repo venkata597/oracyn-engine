@@ -6,5 +6,6 @@ int main(){
     Window window("Test Window");
     while(window.isOpen()){
         window.handleEvents();
+        window.swapBuffers();
     }
 }

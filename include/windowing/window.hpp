@@ -13,7 +13,7 @@ private:
     SDL_Window* window = nullptr;
     SDL_Event event;
     bool status = true;
-
+    SDL_GLContext glcontext;
 private:
     void _create_window(const char* title);
 
@@ -23,4 +23,5 @@ public:
 
     bool isOpen();
     void handleEvents();
+    void swapBuffers();
 };
