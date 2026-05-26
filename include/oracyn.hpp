@@ -5,3 +5,6 @@
 #pragma once
 
 #include "windowing/window.hpp"
+
+// FrontEnd
+#include "resources/scene.hpp"

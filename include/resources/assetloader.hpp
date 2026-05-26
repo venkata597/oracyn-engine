@@ -28,13 +28,14 @@ class AssetLoader{
 private:
 
     std::string assetpath = "assets/";
+    std::string path;
 
     MeshLoader meshloader;
     MaterialLoader materialloader;
 
     gltfLoader modelLoader;
     
-    unsigned int id = 100;
+    static unsigned int _id;
     
     std::vector<std::string> _get_file_contents(std::string path);
 
@@ -45,4 +46,8 @@ private:
 public:
     void loadAsset(std::string assetname);
     AssetData getAssetDataByID(unsigned int id);
+
+    AssetLoader() = default;
+    AssetLoader(const AssetLoader&) = delete;
+    AssetLoader operator=(const AssetLoader&) = delete;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <string>
 #include <vector>
 #include "../glad/glad/glad.h"
 
@@ -16,7 +17,7 @@ struct Texture{
     int width,height,nchannels;
 };
 
-Texture loadTexture(const char* filepath);
+Texture loadTexture(std::string filepath);
 
 
 struct PBR{
@@ -57,6 +58,10 @@ class MaterialLoader{
 private:
     std::vector<MaterialData> materials;
 public:
-    void constructMaterial(cgltf_data* data);
+    void constructMaterial(cgltf_data* data,std::string p);
     const std::vector<MaterialData>& getMaterials() const;
+
+    MaterialLoader() = default;
+    MaterialLoader(const MaterialLoader&) = delete;
+    MaterialLoader operator=(const MaterialLoader&) = delete;
 };

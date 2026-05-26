@@ -17,7 +17,7 @@ void gltfLoader::loadModel(const std::string& modelname){
         modelname.c_str()
     );
 
-    model_map[modelname] = CGLTFDataPtr(data,cgltf_free);
+    model_map[modelname] = CGLTFDataPtr(data);
 }
 
 cgltf_data* gltfLoader::getData(const std::string& modelname){

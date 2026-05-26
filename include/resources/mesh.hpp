@@ -29,4 +29,8 @@ private:
 public:
     void constructMesh(cgltf_data* data);
     const std::vector<Mesh>& getMeshes() const;
+
+    MeshLoader() = default;
+    MeshLoader(const MeshLoader&) = delete;
+    MeshLoader operator=(const MeshLoader&) = delete;
 };

@@ -6,17 +6,26 @@
 #include <string>
 #include <memory>
 
-using CGLTFDataPtr = std::unique_ptr<cgltf_data,decltype(&cgltf_free)>;
+struct CGLTFdeleter{
+    void operator()(cgltf_data* data)const noexcept{
+        if(data){
+            cgltf_free(data);
+        }
+    }
+};
+
+using CGLTFDataPtr = std::unique_ptr<cgltf_data,CGLTFdeleter>;
 
 class gltfLoader{
 private:
 
-    std::unordered_map<std::string,std::unique_ptr<cgltf_data,decltype(&cgltf_free)>> model_map; 
+    std::unordered_map<std::string,CGLTFDataPtr> model_map; 
 
 public:
     void loadModel(const std::string& modelname);
     cgltf_data* getData(const std::string& modelname);
 
+    gltfLoader() = default;
     gltfLoader(const gltfLoader&) = delete;
     gltfLoader operator=(const gltfLoader&) = delete;
 };

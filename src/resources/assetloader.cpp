@@ -3,6 +3,11 @@
 #include <iostream>
 #include <vector>
 
+std::unordered_map<std::string,unsigned int> AssetMap::map;
+std::unordered_map<unsigned int,AssetData> AssetLoader::asset_map;
+
+unsigned int AssetLoader::_id = 100;
+
 unsigned int AssetMap::getAssetID(std::string aname){
     return AssetMap::map[aname];
 }
@@ -19,11 +24,14 @@ std::vector<std::string> AssetLoader::_get_file_contents(std::string path){
 }
 
 void AssetLoader::_register_asset(std::string name){
-    AssetMap::map[name] = id++;
+    AssetMap::map[name] = _id++;
 }
 
 void AssetLoader::loadAsset(std::string aname){
-    std::string path = assetpath + aname + "/";
+    if(AssetMap::map.find(aname) != AssetMap::map.end()){
+        return;
+    }
+    path = assetpath + aname + "/";
     std::vector<std::string> assetcontents = _get_file_contents(path);
     std::string modelfile;
 
@@ -41,7 +49,7 @@ void AssetLoader::loadAsset(std::string aname){
         std::cout << "[ORACYN (AssetLoader)]: Failed to find the .gltf file for " << aname << " model" << '\n';
         return;
     }
-    _register_asset(modelfile);
+    _register_asset(aname);
 
     cgltf_data* data;
     modelLoader.loadModel(path+modelfile);
@@ -50,9 +58,9 @@ void AssetLoader::loadAsset(std::string aname){
     AssetData ad;
     meshloader.constructMesh(data);
     ad.meshes = meshloader.getMeshes();
-
-    materialloader.constructMaterial(data);
+    
+    materialloader.constructMaterial(data,path);
     ad.materials = materialloader.getMaterials();
-
+    
     asset_map[AssetMap::getAssetID(modelfile)] = ad;
 }

@@ -3,9 +3,6 @@
 
 
 int main(){
-    Window window("Test Window");
-    while(window.isOpen()){
-        window.handleEvents();
-        window.swapBuffers();
-    }
+    Scene scene;
+    scene.loadScene("scenes/scene.json");
 }

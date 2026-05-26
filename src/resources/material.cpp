@@ -3,11 +3,12 @@
 #include "../../include/stb_image/stb_image.h"
 #include <iostream>
 #include <vector>
+#include <cstring>
 
-Texture loadTexture(const char* filepath){
+Texture loadTexture(std::string filepath){
     int width,height,channels;
     Texture t;
-    unsigned char* data = stbi_load(filepath,&width,&height,&channels,0);
+    unsigned char* data = stbi_load(filepath.c_str(),&width,&height,&channels,0);
     if(data == NULL){
         t.containsTexture = false;
         t.failure_reason = stbi_failure_reason();
@@ -17,19 +18,18 @@ Texture loadTexture(const char* filepath){
         t.width = width;
         t.nchannels = channels;
         t.containsTexture = true;
-
+        /*
         glGenTextures(1,&t.texID);
         glBindTexture(GL_TEXTURE_2D,t.texID);
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        stbi_image_free(data);
+        glGenerateMipmap(GL_TEXTURE_2D);*/
     }
+    stbi_image_free(data);
     return t;
 }
 
 
-void MaterialLoader::constructMaterial(cgltf_data* data){
+void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
     for(int c = 0;c<data->materials_count;c++){
         cgltf_material* material = &(data->materials[c]);
         MaterialData data;
@@ -50,8 +50,8 @@ void MaterialLoader::constructMaterial(cgltf_data* data){
 
         if(pbr.metallic_roughness_texture.texture){
             filepath = pbr.metallic_roughness_texture.texture->image->uri;
-
-            Texture mtrt = loadTexture(filepath);
+            std::string cf(filepath);
+            Texture mtrt = loadTexture(p+cf);
 
             if(!mtrt.containsTexture){
                 std::cout << "[ORACYN (Material)]: Error Loading Metallic Roughness Texture" << mtrt.failure_reason << '\n';
@@ -64,7 +64,8 @@ void MaterialLoader::constructMaterial(cgltf_data* data){
         // Albedo Texture
         if(pbr.base_color_texture.texture){
             filepath = pbr.base_color_texture.texture->image->uri;
-            Texture base = loadTexture(filepath);
+            std::string cf(filepath);
+            Texture base = loadTexture(p+cf);
 
             if(!base.containsTexture){
                 std::cout << "[ORACYN (Material)]: Error Loading Albedo Texture" << base.failure_reason << '\n';
@@ -77,7 +78,8 @@ void MaterialLoader::constructMaterial(cgltf_data* data){
         // Normal Map
         if(material->normal_texture.texture){
             filepath = material->normal_texture.texture->image->uri;
-            Texture normal = loadTexture(filepath);
+            std::string cf(filepath);
+            Texture normal = loadTexture(p+cf);
             if(!normal.containsTexture){
                 std::cout << "[ORACYN (Material)]: Error Loading Normal Texture" << normal.failure_reason << '\n';
             }
@@ -89,7 +91,8 @@ void MaterialLoader::constructMaterial(cgltf_data* data){
 
         if(material->occlusion_texture.texture){
             filepath = material->occlusion_texture.texture->image->uri;
-            Texture occlusion = loadTexture(filepath);
+            std::string cf(filepath);
+            Texture occlusion = loadTexture(p+cf);
             if(!occlusion.containsTexture){
                 std::cout << "[ORACYN (Material)]: Error Loading Occulsion Texture" << occlusion.failure_reason << '\n';
             }
@@ -101,7 +104,8 @@ void MaterialLoader::constructMaterial(cgltf_data* data){
 
         if(material->emissive_texture.texture){
             filepath = material->emissive_texture.texture->image->uri;
-            Texture emissive = loadTexture(filepath);
+            std::string cf(filepath);
+            Texture emissive = loadTexture(p+cf);
             if(!emissive.containsTexture){
                 std::cout << "[ORACYN (Material)]: Error Loading Emmisive Texture" << emissive.failure_reason << '\n';
             }
