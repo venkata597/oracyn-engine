@@ -12,7 +12,6 @@ private:
 
     AssetLoader loader;
 
-    std::vector<Entity> entities;
     std::unordered_map<Entity,std::vector<Transform>,EntityHasher> instances;
 
     void _load_entity(std::string n,glm::vec3 trans,glm::vec3 rot,glm::vec3 scl,float angle = 0.0f);
@@ -20,7 +19,8 @@ private:
     
 public:
     void loadScene(const std::string& filepath);
-
+    std::vector<Entity> entities;
+    
     Scene() = default;
 
     Scene(const Scene&) = delete;
