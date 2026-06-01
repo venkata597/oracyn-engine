@@ -1,11 +1,20 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 #include "../glad/glad/glad.h"
 
+#include "../../include/stb_image/stb_image.h"
+
+
 struct cgltf_data;
+
+
+struct Deleter{
+    void operator()(unsigned char* p) {stbi_image_free(p);}
+};
 
 struct Texture{
 
@@ -15,6 +24,8 @@ struct Texture{
     const char* failure_reason;
 
     int width,height,nchannels;
+
+    std::unique_ptr<unsigned char [],Deleter> img_data;
 };
 
 Texture loadTexture(std::string filepath);
@@ -59,7 +70,7 @@ private:
     std::vector<MaterialData> materials;
 public:
     void constructMaterial(cgltf_data* data,std::string p);
-    const std::vector<MaterialData>& getMaterials() const;
+    std::vector<MaterialData> getMaterials();
 
     MaterialLoader() = default;
     MaterialLoader(const MaterialLoader&) = delete;

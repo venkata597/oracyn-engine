@@ -44,7 +44,7 @@ void Scene::loadScene(const std::string& filepath){
                     entity.value("name",""),
                     trans,
                     rot,
-                scale,
+                    scale,
                     angle
                 );
             }

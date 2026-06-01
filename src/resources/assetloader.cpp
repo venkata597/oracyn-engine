@@ -60,7 +60,7 @@ void AssetLoader::loadAsset(std::string aname){
     ad.meshes = meshloader.getMeshes();
     
     materialloader.constructMaterial(data,path);
-    ad.materials = materialloader.getMaterials();
+    ad.materials = std::move(materialloader.getMaterials());
     
-    asset_map[AssetMap::getAssetID(modelfile)] = ad;
+    asset_map[AssetMap::getAssetID(modelfile)] = std::move(ad);
 }

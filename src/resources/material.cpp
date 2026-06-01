@@ -1,7 +1,7 @@
 #include "../../include/resources/material.hpp"
 #include "../../include/gltf/cgltf/cgltf.h"
-#include "../../include/stb_image/stb_image.h"
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <cstring>
 
@@ -18,14 +18,9 @@ Texture loadTexture(std::string filepath){
         t.width = width;
         t.nchannels = channels;
         t.containsTexture = true;
-        /*
-        glGenTextures(1,&t.texID);
-        glBindTexture(GL_TEXTURE_2D,t.texID);
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
-        glGenerateMipmap(GL_TEXTURE_2D);*/
+        t.img_data = std::unique_ptr<unsigned char [],Deleter>(data);
     }
-    stbi_image_free(data);
-    return t;
+    return std::move(t);
 }
 
 
@@ -57,7 +52,7 @@ void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
                 std::cout << "[ORACYN (Material)]: Error Loading Metallic Roughness Texture" << mtrt.failure_reason << '\n';
             }
             else{
-                data.pbr.metallicRoughnessTexture = mtrt;
+                data.pbr.metallicRoughnessTexture = std::move(mtrt);
             }
         }
 
@@ -71,7 +66,7 @@ void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
                 std::cout << "[ORACYN (Material)]: Error Loading Albedo Texture" << base.failure_reason << '\n';
             }
             else{
-                data.albedo = base;
+                data.albedo = std::move(base);
             }
         }
 
@@ -84,7 +79,7 @@ void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
                 std::cout << "[ORACYN (Material)]: Error Loading Normal Texture" << normal.failure_reason << '\n';
             }
             else{
-                data.normal = normal;
+                data.normal = std::move(normal);
                 data.normalScale = material->normal_texture.scale;
             }
         }
@@ -97,7 +92,7 @@ void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
                 std::cout << "[ORACYN (Material)]: Error Loading Occulsion Texture" << occlusion.failure_reason << '\n';
             }
             else{
-                data.occlusion = occlusion;
+                data.occlusion = std::move(occlusion);
                 data.occlusionStrength = material->occlusion_texture.scale;   
             }
         }
@@ -110,7 +105,7 @@ void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
                 std::cout << "[ORACYN (Material)]: Error Loading Emmisive Texture" << emissive.failure_reason << '\n';
             }
             else{
-                data.emissive = emissive;
+                data.emissive = std::move(emissive);
                 data.emissiveStrength = material->emissive_strength.emissive_strength;
                 data.emissiveFactor = glm::vec3(
                     material->emissive_factor[0],
@@ -137,10 +132,10 @@ void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
                 data.mode = AlphaMode::OPAQUE; // For Now
         }
 
-        materials.push_back(data);
+        materials.push_back(std::move(data));
     }
 }
 
-const std::vector<MaterialData>& MaterialLoader::getMaterials() const{
-    return this->materials;
+std::vector<MaterialData> MaterialLoader::getMaterials(){
+    return std::move(this->materials);
 }
