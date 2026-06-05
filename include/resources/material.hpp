@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "../glad/glad/glad.h"
 
 #include "../../include/stb_image/stb_image.h"
 
@@ -65,7 +64,7 @@ struct MaterialData{
     bool doubleSided;
 };
 
-class MaterialLoader{
+class MaterialLoader{   
 private:
     std::vector<MaterialData> materials;
 public:

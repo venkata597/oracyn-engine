@@ -1,9 +1,9 @@
 {
   "entities": [
     {
-      "type": "chair",
-      "name": "breenchair",
-      "modelpath": "breenchair",
+      "type": "helmet",
+      "name": "flighthelmet",
+      "modelpath": "flighthelmet",
       "has_instances": true,
       "instance_count": 2,
       "instances": [

@@ -1,8 +1,15 @@
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 #include "../include/oracyn.hpp"
 
 
 int main(){
-    Scene scene;
-    scene.loadScene("scenes/scene.json");
+    AppWindow window("Test Engine");
+    VulkanBackend backend;
+    backend.initBackend(window.getExtensions(),window);
+    while(window.isOpen()){
+        window.handleEvents();
+        backend.drawFrame();
+        window.swapBuffers();
+    }
 }

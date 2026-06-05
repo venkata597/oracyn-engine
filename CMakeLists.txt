@@ -7,9 +7,11 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(SDL2 REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(Vulkan REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 add_executable(engine ${SOURCES})    
 
 target_link_libraries(engine PRIVATE SDL2::SDL2)
 target_link_libraries(engine PRIVATE glm::glm)
+target_link_libraries(engine PRIVATE Vulkan::Vulkan)
