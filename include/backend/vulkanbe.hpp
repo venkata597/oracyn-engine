@@ -9,6 +9,7 @@
 #include <iostream>
 #include <optional>
 #include "../windowing/window.hpp"
+#include "be_vertex.hpp"
 
 #ifndef NDEBUG
     const std::vector<const char*> validation_layers = {
@@ -46,6 +47,12 @@ private:
 
     const std::vector<const char*> device_extensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
+
+    const std::vector<gpuVertex> vertices = {
+        {{0.0f,-0.5f},{1.0f,0.0,0.0f}},
+        {{0.5f,0.5f},{0.0f,1.0f,0.0f}},
+        {{-0.5f,0.5f},{0.0f,0.0f,1.0f}}
     };
 
     struct _SwapChainSupportDetails{
@@ -91,6 +98,9 @@ private:
     std::vector<VkFence> imagesInFlight;
 
     uint32_t currentFrame = 0;
+
+    VkBuffer vertexBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
 private:
     // Create Instance
     void _create_instance(std::vector<const char*> extensions);
@@ -153,6 +163,10 @@ private:
     // Swapchain Recreation
     void _cleanup_swap_chain();
     void _recreate_swap_chain();
+
+    // Vertex Buffer Creation
+    uint32_t _find_memory_type(uint32_t type_filter,VkMemoryPropertyFlags flags);
+    void _create_vertex_buffer();
 
 public:
     void initBackend(std::vector<const char*> extensions,AppWindow& window);

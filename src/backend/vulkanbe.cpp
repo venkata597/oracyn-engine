@@ -1,5 +1,6 @@
 #include "../../include/backend/vulkanbe.hpp"
 #include "../../include/backend/be_shader.hpp"
+#include "../../include/backend/be_vertex.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -492,11 +493,13 @@ void VulkanBackend::_create_graphics_pipeline(){
     dyn_create_info.pDynamicStates = dyn_states.data();
 
     VkPipelineVertexInputStateCreateInfo vinp_create_info{};
+    auto bnd_dsc = gpuVertex::getBindingDesc();
+    auto attr_dsc = gpuVertex::getAttributeDesc();
     vinp_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vinp_create_info.vertexBindingDescriptionCount = 0;
-    vinp_create_info.pVertexBindingDescriptions = nullptr;
-    vinp_create_info.vertexAttributeDescriptionCount = 0;
-    vinp_create_info.pVertexAttributeDescriptions = nullptr;
+    vinp_create_info.vertexBindingDescriptionCount = 1;
+    vinp_create_info.pVertexBindingDescriptions = &bnd_dsc;
+    vinp_create_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(attr_dsc.size());
+    vinp_create_info.pVertexAttributeDescriptions = attr_dsc.data();
     
     VkPipelineInputAssemblyStateCreateInfo ias_create_info{};
     ias_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -677,7 +680,12 @@ void VulkanBackend::_record_command_buffer(VkCommandBuffer commandBuffer,uint32_
         vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,graphicsPipeline);
         vkCmdSetViewport(commandBuffer,0,1,&viewPort);
         vkCmdSetScissor(commandBuffer,0,1,&scissor);
-        vkCmdDraw(commandBuffer,3,1,0,0);
+        
+        VkBuffer vertexBuffers[] = {vertexBuffer};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
+        vkCmdDraw(commandBuffer,static_cast<uint32_t>(vertices.size()),1,0,0);
+
     vkCmdEndRenderPass(commandBuffer);
 
     if(vkEndCommandBuffer(commandBuffer)!=VK_SUCCESS){
@@ -742,6 +750,53 @@ void VulkanBackend::_recreate_swap_chain(){
     _create_frame_buffers();
 }
 
+uint32_t VulkanBackend::_find_memory_type(uint32_t type_filter,VkMemoryPropertyFlags flags){
+    VkPhysicalDeviceMemoryProperties mem_props;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &mem_props);
+    for(uint32_t i = 0;i<mem_props.memoryTypeCount;i++){
+        if(type_filter & (1<<i) && (mem_props.memoryTypes[i].propertyFlags & flags) == flags){
+            return i;
+        }
+    }
+    std::cout << "[ORACYN (BACKEND)]: Failed to find suitable memory type" << '\n';
+    return -1;
+}
+
+void VulkanBackend::_create_vertex_buffer(){
+    VkBufferCreateInfo bfc_inf{};
+    bfc_inf.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bfc_inf.size = sizeof(vertices[0]) * vertices.size();
+    bfc_inf.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bfc_inf.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if(vkCreateBuffer(ldevice,&bfc_inf,nullptr,&vertexBuffer)!=VK_SUCCESS){
+        std::cout << "[ORACYN (BACKEND)]: Failed to create vertex buffer" << '\n';
+        return;
+    }
+
+    VkMemoryRequirements mem_rqrmnts;
+    vkGetBufferMemoryRequirements(ldevice,vertexBuffer,&mem_rqrmnts);
+    VkMemoryAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = mem_rqrmnts.size;
+    alloc_info.memoryTypeIndex = _find_memory_type(mem_rqrmnts.memoryTypeBits,VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    if(vkAllocateMemory(ldevice,&alloc_info,nullptr,&vertexBufferMemory)!=VK_SUCCESS){
+        std::cout << "[ORACYN (BACKEND)]: Failed to allocate memory for vertex buffer" << '\n';
+        return;
+    }
+
+    if(vkBindBufferMemory(ldevice,vertexBuffer,vertexBufferMemory,0)!=VK_SUCCESS){
+        std::cout << "[ORACYN (BACKEND)]: Failed to bind vertex buffer" << '\n';
+        return;
+    }
+
+    void* data;
+    vkMapMemory(ldevice,vertexBufferMemory,0,bfc_inf.size,0,&data);
+        memcpy(data,vertices.data(),(size_t)bfc_inf.size);
+    vkUnmapMemory(ldevice,vertexBufferMemory);
+}
+
 void VulkanBackend::initBackend(std::vector<const char*> extensions,AppWindow& window){
     this->window = &window;
     _create_instance(extensions);
@@ -762,6 +817,7 @@ void VulkanBackend::initBackend(std::vector<const char*> extensions,AppWindow& w
     _create_graphics_pipeline();
     _create_frame_buffers();
     _create_command_pool();
+    _create_vertex_buffer();
     _create_command_buffers();
     _create_sync_objects();
 }
@@ -862,6 +918,12 @@ VulkanBackend::~VulkanBackend(){
 
     _cleanup_swap_chain();
 
+    if(vertexBuffer!=VK_NULL_HANDLE){
+        vkDestroyBuffer(ldevice,vertexBuffer,nullptr);
+    }
+    if(vertexBufferMemory!=VK_NULL_HANDLE){
+        vkFreeMemory(ldevice,vertexBufferMemory,nullptr);
+    }
 
     for(size_t i = 0;i<swapChainImages.size();i++){
         if(renderFinishedSemaphores[i]!=VK_NULL_HANDLE){
