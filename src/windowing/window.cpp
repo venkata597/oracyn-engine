@@ -3,7 +3,6 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_vulkan.h>
 #include <SDL2/SDL_video.h>
-#include <SDL_stdinc.h>
 #include <iostream>
 
 
@@ -14,7 +13,7 @@ void AppWindow::_create_window(const char* title){
         SDL_WINDOWPOS_UNDEFINED,
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
-        SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN
+        SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
 
     if(window==NULL){
@@ -47,6 +46,11 @@ void AppWindow::handleEvents(){
         if(event.type == SDL_QUIT){
             this->status = false;
         }
+        else if(event.type==SDL_WINDOWEVENT){
+            if(event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
+                this->resized = true;
+            }
+        }
     }
 }
 
@@ -56,6 +60,14 @@ void AppWindow::swapBuffers(){
 
 bool AppWindow::isOpen(){
     return status;
+}
+
+bool AppWindow::isResized(){
+    return resized;
+}
+
+void AppWindow::clearResize(){
+    resized = false;
 }
 
 std::vector<const char*> AppWindow::getExtensions(){

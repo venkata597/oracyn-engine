@@ -20,6 +20,8 @@
 #endif
 
 
+const int MAX_FRAMES_IN_FLIGHT = 2; 
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messasgeType,
@@ -53,6 +55,9 @@ private:
     };
 
 private:
+
+    AppWindow* window = nullptr;
+    bool windowResized = false;
     VkInstance instance = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
@@ -78,11 +83,14 @@ private:
     std::vector<VkFramebuffer> swapChainFrameBuffers;
 
     VkCommandPool commandPool = VK_NULL_HANDLE;
-    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    std::vector<VkCommandBuffer> commandBuffers;
 
-    VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
-    VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
-    VkFence inFlightFence = VK_NULL_HANDLE;
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
+    std::vector<VkFence> inFlightFences;
+    std::vector<VkFence> imagesInFlight;
+
+    uint32_t currentFrame = 0;
 private:
     // Create Instance
     void _create_instance(std::vector<const char*> extensions);
@@ -134,7 +142,7 @@ private:
     void _create_command_pool();
 
     // Command Buffer Creation
-    void _create_command_buffer();
+    void _create_command_buffers();
 
     // Command Buffer Recording
     void _record_command_buffer(VkCommandBuffer commandBuffer,uint32_t imageIndex);
@@ -142,8 +150,13 @@ private:
     // Create Synchronization Objects
     void _create_sync_objects();
 
+    // Swapchain Recreation
+    void _cleanup_swap_chain();
+    void _recreate_swap_chain();
+
 public:
     void initBackend(std::vector<const char*> extensions,AppWindow& window);
+    void resize();
     void drawFrame();
     void deviceWait();
     ~VulkanBackend();

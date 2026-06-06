@@ -9,7 +9,12 @@ int main(){
     backend.initBackend(window.getExtensions(),window);
     while(window.isOpen()){
         window.handleEvents();
+        if(window.isResized()){
+            backend.resize();
+            window.clearResize();
+        }
         backend.drawFrame();
         window.swapBuffers();
     }
+    backend.deviceWait();
 }

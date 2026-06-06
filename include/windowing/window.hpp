@@ -25,6 +25,7 @@ private:
     SDL_Window* window = nullptr;
     SDL_Event event;
     bool status = true;
+    bool resized = false;
 private:
     void _create_window(const char* title);
 
@@ -35,6 +36,8 @@ public:
     bool isOpen();
     void handleEvents();
     void swapBuffers();
+    bool isResized();
+    void clearResize();
     std::vector<const char*> getExtensions();
     std::pair<SDL_Window*,std::vector<const char*>> getVulkanInitData();
     VkSurfaceKHR createVulkanSurface(const VkInstance& instance);

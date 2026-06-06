@@ -1,6 +1,7 @@
 #include "../../include/backend/vulkanbe.hpp"
 #include "../../include/backend/be_shader.hpp"
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -633,14 +634,18 @@ void VulkanBackend::_create_command_pool(){
     }
 }
 
-void VulkanBackend::_create_command_buffer(){
+void VulkanBackend::_create_command_buffers(){
+    uint32_t image_c;
+    vkGetSwapchainImagesKHR(ldevice,swapChain,&image_c,nullptr);
+    commandBuffers.resize(image_c);
+
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     alloc_info.commandPool = commandPool;
     alloc_info.level  = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info.commandBufferCount = 1;
+    alloc_info.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
     
-    if(vkAllocateCommandBuffers(ldevice,&alloc_info,&commandBuffer)!=VK_SUCCESS){
+    if(vkAllocateCommandBuffers(ldevice,&alloc_info,commandBuffers.data())!=VK_SUCCESS){
         std::cout << "[ORACYN (BACKEND)]: Failed to allocate command buffers" << '\n';
         return;
     }
@@ -681,6 +686,14 @@ void VulkanBackend::_record_command_buffer(VkCommandBuffer commandBuffer,uint32_
 }
 
 void VulkanBackend::_create_sync_objects(){
+    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    renderFinishedSemaphores.resize(swapChainImages.size());
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);    
+    uint32_t image_c;
+    vkGetSwapchainImagesKHR(ldevice,swapChain,&image_c,nullptr);
+
+    imagesInFlight.resize(image_c,VK_NULL_HANDLE);
+    
     VkSemaphoreCreateInfo semaphore_info{};
     semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -688,15 +701,49 @@ void VulkanBackend::_create_sync_objects(){
     fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    if(vkCreateSemaphore(ldevice,&semaphore_info,nullptr,&imageAvailableSemaphore) ||
-        vkCreateSemaphore(ldevice,&semaphore_info,nullptr,&renderFinishedSemaphore) ||
-        vkCreateFence(ldevice,&fence_info,nullptr,&inFlightFence)){
+    for(size_t i = 0;i<MAX_FRAMES_IN_FLIGHT;i++){
+        if(vkCreateSemaphore(ldevice,&semaphore_info,nullptr,&imageAvailableSemaphores[i]) ||
+            vkCreateFence(ldevice,&fence_info,nullptr,&inFlightFences[i])){
+                std::cout << "[ORACYN (BACKEND)]: Failed to create Semaphores or Fence" << '\n';
+                return;
+        }
+    }
+
+    for(size_t i = 0;i<swapChainImages.size();i++){
+        if(vkCreateSemaphore(ldevice,&semaphore_info,nullptr,&renderFinishedSemaphores[i]) != VK_SUCCESS){
             std::cout << "[ORACYN (BACKEND)]: Failed to create Semaphores or Fence" << '\n';
             return;
+        }
     }
 }
 
+void VulkanBackend::_cleanup_swap_chain(){
+    for(auto framebuffer: swapChainFrameBuffers){
+        vkDestroyFramebuffer(ldevice,framebuffer,nullptr);
+    }
+    for(auto imageview: swapChainImageViews){
+        vkDestroyImageView(ldevice,imageview,nullptr);
+    }
+    vkDestroySwapchainKHR(ldevice,swapChain,nullptr);
+    vkDestroyPipeline(ldevice,graphicsPipeline,nullptr);
+    vkDestroyPipelineLayout(ldevice,pipelineLayout,nullptr);
+    vkDestroyRenderPass(ldevice,renderPass, nullptr);
+}
+
+void VulkanBackend::_recreate_swap_chain(){
+    vkDeviceWaitIdle(ldevice);
+
+    _cleanup_swap_chain();
+
+    _create_swapchain(*this->window);
+    _create_image_views();
+    _create_render_pass();
+    _create_graphics_pipeline();
+    _create_frame_buffers();
+}
+
 void VulkanBackend::initBackend(std::vector<const char*> extensions,AppWindow& window){
+    this->window = &window;
     _create_instance(extensions);
     surface = window.createVulkanSurface(this->instance);
     if(enableValidationLayers){
@@ -715,24 +762,47 @@ void VulkanBackend::initBackend(std::vector<const char*> extensions,AppWindow& w
     _create_graphics_pipeline();
     _create_frame_buffers();
     _create_command_pool();
-    _create_command_buffer();
+    _create_command_buffers();
     _create_sync_objects();
 }
 
 void VulkanBackend::drawFrame(){
-    vkWaitForFences(ldevice,1,&inFlightFence,VK_TRUE,UINT64_MAX);
-    vkResetFences(ldevice,1,&inFlightFence);
+    vkWaitForFences(ldevice,1,&inFlightFences[currentFrame],VK_TRUE,UINT64_MAX);
+    
+    if(windowResized){
+        windowResized = false;
+        _recreate_swap_chain();
+        return;
+    }
 
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(ldevice,swapChain,UINT64_MAX,imageAvailableSemaphore,VK_NULL_HANDLE,&imageIndex);
-    vkResetCommandBuffer(commandBuffer,0);
-    _record_command_buffer(commandBuffer,imageIndex);
+    VkResult result = vkAcquireNextImageKHR(ldevice,swapChain,UINT64_MAX,imageAvailableSemaphores[currentFrame],VK_NULL_HANDLE,&imageIndex);
+
+    if(result==VK_ERROR_OUT_OF_DATE_KHR || result==VK_SUBOPTIMAL_KHR || windowResized){
+        windowResized = false;
+        _recreate_swap_chain();
+        return;
+    }else if(result!= VK_SUCCESS){
+        std::cout << "[ORACYN (BACKEND)]: Failed to acquire swapchain image" << '\n';
+        return;
+    }
+
+    if(imagesInFlight[imageIndex]!=VK_NULL_HANDLE){
+        vkWaitForFences(ldevice,1,&imagesInFlight[imageIndex],VK_TRUE,UINT64_MAX);
+    }
+
+    imagesInFlight[imageIndex] =  inFlightFences[currentFrame];
+
+    vkResetFences(ldevice,1,&inFlightFences[currentFrame]);
+
+    vkResetCommandBuffer(commandBuffers[imageIndex],0);
+    _record_command_buffer(commandBuffers[imageIndex],imageIndex);
 
     VkSubmitInfo submit_info{};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     VkSemaphore wait_semaphores[] = {
-        imageAvailableSemaphore
+        imageAvailableSemaphores[currentFrame]
     };
 
     VkPipelineStageFlags wait_stages[] = {
@@ -743,15 +813,15 @@ void VulkanBackend::drawFrame(){
     submit_info.pWaitSemaphores = wait_semaphores;
     submit_info.pWaitDstStageMask = wait_stages;
     submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &commandBuffer;
+    submit_info.pCommandBuffers = &commandBuffers[imageIndex];
 
     VkSemaphore signal_semaphores[] = {
-        renderFinishedSemaphore
+        renderFinishedSemaphores[imageIndex]
     };
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = signal_semaphores;
 
-    if(vkQueueSubmit(graphicsQueue,1,&submit_info,inFlightFence)!=VK_SUCCESS){
+    if(vkQueueSubmit(graphicsQueue,1,&submit_info,inFlightFences[currentFrame])!=VK_SUCCESS){
         std::cout << "[ORACYN (BACKEND)]: Failed to submit to the graphics queue" << '\n';
         return;
     }   
@@ -767,48 +837,49 @@ void VulkanBackend::drawFrame(){
     present_info.pImageIndices = &imageIndex;
     present_info.pResults = nullptr;
 
-    vkQueuePresentKHR(presentQueue,&present_info);
+    result = vkQueuePresentKHR(presentQueue,&present_info);
+    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || windowResized){
+        windowResized = false;
+        _recreate_swap_chain();
+        
+    }else if(result != VK_SUCCESS){
+        std::cout << "[ORACYN (BACKEND)]: Failed to present swap chain image" << '\n';
+        return;
+    }
+
+    currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
 }
 
 void VulkanBackend::deviceWait(){
     vkDeviceWaitIdle(ldevice);
 }
 
+void VulkanBackend::resize(){
+    windowResized = true;
+}
+
 VulkanBackend::~VulkanBackend(){
-    if(inFlightFence!=VK_NULL_HANDLE){
-        vkDestroyFence(ldevice,inFlightFence,nullptr);
+
+    _cleanup_swap_chain();
+
+
+    for(size_t i = 0;i<swapChainImages.size();i++){
+        if(renderFinishedSemaphores[i]!=VK_NULL_HANDLE){
+            vkDestroySemaphore(ldevice,renderFinishedSemaphores[i],nullptr);
+        }
     }
-    if(renderFinishedSemaphore!=VK_NULL_HANDLE){
-        vkDestroySemaphore(ldevice,renderFinishedSemaphore,nullptr);
-    }
-    if(imageAvailableSemaphore!=VK_NULL_HANDLE){
-        vkDestroySemaphore(ldevice,imageAvailableSemaphore,nullptr);
+    for(size_t i = 0;i<MAX_FRAMES_IN_FLIGHT;i++){
+        if(inFlightFences[i]!=VK_NULL_HANDLE){
+            vkDestroyFence(ldevice,inFlightFences[i],nullptr);
+        }
+        if(imageAvailableSemaphores[i]!=VK_NULL_HANDLE){
+            vkDestroySemaphore(ldevice,imageAvailableSemaphores[i],nullptr);
+        }
     }
     if(commandPool!=VK_NULL_HANDLE){
         vkDestroyCommandPool(ldevice,commandPool,nullptr);
     }
-    if(!swapChainFrameBuffers.empty()){
-        for(auto frame_buf: swapChainFrameBuffers){
-            vkDestroyFramebuffer(ldevice,frame_buf,nullptr);
-        }
-    }
-    if(graphicsPipeline!=VK_NULL_HANDLE){
-        vkDestroyPipeline(ldevice,graphicsPipeline,nullptr);
-    }
-    if(pipelineLayout!=VK_NULL_HANDLE){
-        vkDestroyPipelineLayout(ldevice,pipelineLayout,nullptr);
-    }
-    if(renderPass!=VK_NULL_HANDLE){
-        vkDestroyRenderPass(ldevice,renderPass,nullptr);
-    }
-    if(!swapChainImageViews.empty()){
-        for(auto image_view: swapChainImageViews){
-            vkDestroyImageView(ldevice,image_view,nullptr);
-        }
-    }
-    if(swapChain!=VK_NULL_HANDLE){
-        vkDestroySwapchainKHR(ldevice,swapChain,nullptr);
-    }
+    
     if(ldevice!=VK_NULL_HANDLE){
         vkDestroyDevice(ldevice,nullptr);
     }
