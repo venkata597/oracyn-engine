@@ -9,6 +9,3 @@
 // FrontEnd
 #include "resources/scene.hpp"
 
-
-// BackEnd
-#include "backend/vulkan/vulkanbe.hpp"
