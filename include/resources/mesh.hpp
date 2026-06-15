@@ -2,15 +2,9 @@
 
 #include <glm/glm.hpp>
 #include <vector>
-
+#include "vertex.hpp"
 
 struct cgltf_data;
-
-typedef struct{
-    glm::vec3 position;
-    glm::vec2 uv;
-    glm::vec3 normals;
-} Vertex;
 
 typedef struct{
     std::vector<Vertex> vertices;

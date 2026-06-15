@@ -18,7 +18,7 @@ inline void hash_combine(std::size_t& seed,unsigned int v){
 struct Transform{
 
     enum Mode{
-        TRANSLATE,
+        TRANSLATE, 
         ROTATE,
         SCALE
     };

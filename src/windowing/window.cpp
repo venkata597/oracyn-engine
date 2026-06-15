@@ -1,7 +1,6 @@
 #include "../../include/windowing/window.hpp"
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_events.h>
-#include <SDL2/SDL_vulkan.h>
 #include <SDL2/SDL_video.h>
 #include <iostream>
 
@@ -13,7 +12,7 @@ void AppWindow::_create_window(const char* title){
         SDL_WINDOWPOS_UNDEFINED,
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
-        SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
 
     if(window==NULL){
@@ -23,6 +22,17 @@ void AppWindow::_create_window(const char* title){
     else{
         SDL_PumpEvents();
     }
+
+    glContext = SDL_GL_CreateContext(window);
+    if(glContext == NULL){
+        std::cout << "[ORACYN (WINDOWING)]: Unable to create an OpenGL context" << SDL_GetError() << '\n';
+    }
+
+    if(glewInit()!=GLEW_OK){
+        std::cout << "[ORACYN (WINDOWING)]: Unable to initialize GLEW" << '\n';
+    }
+
+    std::cout << glGetString(GL_VERSION) << '\n';   
 }
 
 AppWindow::AppWindow(const char* title){
@@ -70,36 +80,14 @@ void AppWindow::clearResize(){
     resized = false;
 }
 
-std::vector<const char*> AppWindow::getExtensions(){
-    unsigned int extension_count = 0;
-    if(!SDL_Vulkan_GetInstanceExtensions(window,&extension_count,nullptr)){
-        std::cerr << "[ORACYN (WINDOWING)]: Unable to get Vulkan instance extension count" << SDL_GetError() << '\n'; 
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-    }
-    std::vector<const char*> extensions(extension_count);
-    if(!SDL_Vulkan_GetInstanceExtensions(window,&extension_count,extensions.data())){
-        std::cerr << "[ORACYN (WINDOWING)]: Unable to get Vulkan extensions" << SDL_GetError() << '\n';
-    }
-    return extensions;
-}
-
-VkSurfaceKHR AppWindow::createVulkanSurface(const VkInstance& instance){
-    VkSurfaceKHR surface;
-    if(SDL_Vulkan_CreateSurface(window,instance,&surface) != SDL_TRUE){
-        std::cerr << "[ORACYN (WINDOWING)]: Failed to create a Vulkan Surface" << SDL_GetError() << '\n';
-        return nullptr;
-    }
-    return surface;
-}
-
 std::pair<int,int> AppWindow::getFrameBufferSize(){
     int width,height;
-    SDL_Vulkan_GetDrawableSize(window,&width,&height);
+    SDL_GL_GetDrawableSize(window,&width,&height);
     return std::make_pair(width,height);
 }
 
 AppWindow::~AppWindow(){
+    SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
     window = nullptr;
     SDL_Quit();

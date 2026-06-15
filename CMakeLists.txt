@@ -7,6 +7,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(SDL2 REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
@@ -14,4 +15,5 @@ add_executable(engine ${SOURCES})
 
 target_link_libraries(engine PRIVATE SDL2::SDL2)
 target_link_libraries(engine PRIVATE glm::glm)
+target_link_libraries(engine PRIVATE OpenGL::GL)
 target_link_libraries(engine PRIVATE GLEW::GLEW)
