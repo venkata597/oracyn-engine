@@ -7,18 +7,21 @@
 
 using json = nlohmann::json;
 
+using SceneMap = std::unordered_map<Entity,std::vector<Transform>,EntityHasher>;
+
 class Scene{
 private:
 
     AssetLoader loader;
     std::vector<Entity> entities;
-    std::unordered_map<Entity,std::vector<Transform>,EntityHasher> instances;
+    SceneMap instances;
 
     void _load_entity(std::string n,glm::vec3 trans,glm::vec3 rot,glm::vec3 scl,float angle = 0.0f);
     void _map_entities();
     
 public:
     void loadScene(const std::string& filepath);
+    SceneMap getScene();
 
     Scene() = default;
 

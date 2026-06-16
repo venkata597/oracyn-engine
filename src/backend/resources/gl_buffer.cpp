@@ -1,4 +1,4 @@
-#include "../../../include/backend/opengl/gl_buffer.hpp"
+#include "../../../include/backend/resources/gl_buffer.hpp"
 #include <cstdint>
 
 void Backend::VertexBuffer::create(){
@@ -23,4 +23,12 @@ void Backend::IndexBuffer::bind(){
 
 void Backend::IndexBuffer::setData(std::vector<uint32_t> indices){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,indices.size()*sizeof(uint32_t),indices.data(),GL_STATIC_DRAW);
+}
+
+void Backend::VertexBuffer::deleteBuffer(){
+    glDeleteBuffers(1,&id);
+}
+
+void Backend::IndexBuffer::deleteBuffer(){
+    glDeleteBuffers(1,&id);
 }

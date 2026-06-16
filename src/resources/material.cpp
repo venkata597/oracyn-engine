@@ -24,7 +24,8 @@ Texture loadTexture(std::string filepath){
 }
 
 
-void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
+std::vector<MaterialData> MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
+    std::vector<MaterialData> materials;
     for(int c = 0;c<data->materials_count;c++){
         cgltf_material* material = &(data->materials[c]);
         MaterialData data;
@@ -134,8 +135,5 @@ void MaterialLoader::constructMaterial(cgltf_data* data,std::string p){
 
         materials.push_back(std::move(data));
     }
-}
-
-std::vector<MaterialData> MaterialLoader::getMaterials(){
-    return std::move(this->materials);
+    return std::move(materials);
 }

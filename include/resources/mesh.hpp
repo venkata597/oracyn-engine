@@ -9,6 +9,8 @@ struct cgltf_data;
 typedef struct{
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
+
+    uint32_t material_index;
 }Primitive;
 
 struct Mesh{
@@ -18,11 +20,8 @@ struct Mesh{
 
 class MeshLoader{
 private:
-    std::vector<Mesh> meshes;
-    Primitive data;
 public:
-    void constructMesh(cgltf_data* data);
-    const std::vector<Mesh>& getMeshes() const;
+    std::vector<Mesh> constructMesh(cgltf_data* data);
 
     MeshLoader() = default;
     MeshLoader(const MeshLoader&) = delete;

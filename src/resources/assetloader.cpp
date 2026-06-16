@@ -43,7 +43,7 @@ void AssetLoader::loadAsset(std::string aname){
         else{
             continue;
         }
-    }  
+    } 
 
     if(modelfile.empty()){
         std::cout << "[ORACYN (AssetLoader)]: Failed to find the .gltf file for " << aname << " model" << '\n';
@@ -56,11 +56,8 @@ void AssetLoader::loadAsset(std::string aname){
     data = modelLoader.getData(path+modelfile);
 
     AssetData ad;
-    meshloader.constructMesh(data);
-    ad.meshes = meshloader.getMeshes();
+    ad.meshes = meshloader.constructMesh(data);
+    ad.materials = std::move(materialloader.constructMaterial(data,path));
     
-    materialloader.constructMaterial(data,path);
-    ad.materials = std::move(materialloader.getMaterials());
-    
-    asset_map[AssetMap::getAssetID(modelfile)] = std::move(ad);
+    asset_map[AssetMap::getAssetID(aname)] = std::move(ad);
 }

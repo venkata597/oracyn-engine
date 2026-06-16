@@ -1,5 +1,4 @@
 #include "../../include/resources/entity.hpp"
-#include <functional>
 
 unsigned int Entity::_id = 0;
 

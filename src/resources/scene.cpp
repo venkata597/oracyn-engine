@@ -1,6 +1,7 @@
 #include "../../include/resources/scene.hpp"
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 
 void Scene::_load_entity(std::string n,glm::vec3 trans,glm::vec3 rot,glm::vec3 scl,float angle){
@@ -50,5 +51,9 @@ void Scene::loadScene(const std::string& filepath){
             }
         }
     }
+    _map_entities();
 }
 
+SceneMap Scene::getScene(){
+    return std::move(instances);
+}

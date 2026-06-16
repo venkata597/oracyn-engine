@@ -40,6 +40,7 @@ namespace Backend{
         void create();
         void bind();
         void setData(std::vector<Vertex> vertices);
+        void deleteBuffer();
     };
 
     class IndexBuffer{
@@ -49,5 +50,6 @@ namespace Backend{
         void create();
         void bind();
         void setData(std::vector<uint32_t> indices);
+        void deleteBuffer();
     };
 }

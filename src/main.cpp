@@ -4,9 +4,6 @@
 
 int main(){
     AppWindow window("Test Engine");
-    while(window.isOpen()){
-        window.handleEvents();
-        
-        window.swapBuffers();
-    }
+    Scene scene;
+    scene.loadScene("scenes/scene.json");
 }

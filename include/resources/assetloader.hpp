@@ -45,7 +45,7 @@ private:
 
 public:
     void loadAsset(std::string assetname);
-    AssetData getAssetDataByID(unsigned int id);
+    static const AssetData& getAssetDataByID(unsigned int id){ return asset_map.at(id);}
 
     AssetLoader() = default;
     AssetLoader(const AssetLoader&) = delete;

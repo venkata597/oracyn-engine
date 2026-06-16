@@ -5,14 +5,22 @@
 #include <vector>
 
 struct DrawCommand{
-    Entity entity;
+    unsigned int assetID;
     unsigned int instance_count;
     std::vector<Transform> transforms;
 };
 
+struct RenderState{
+    SceneMap map;
+    std::vector<DrawCommand> draw_queue;
+};
+
 class Renderer{
 private:
-    Scene scene;
+    RenderState state;
+
+    void _build_render_queue(const SceneMap& map);
 public:
-    void draw(Scene scene);
+    void draw(const SceneMap& map);
+    const std::vector<DrawCommand>& getQueue();
 };

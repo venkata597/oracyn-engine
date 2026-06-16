@@ -66,10 +66,8 @@ struct MaterialData{
 
 class MaterialLoader{   
 private:
-    std::vector<MaterialData> materials;
 public:
-    void constructMaterial(cgltf_data* data,std::string p);
-    std::vector<MaterialData> getMaterials();
+    std::vector<MaterialData> constructMaterial(cgltf_data* data,std::string p);
 
     MaterialLoader() = default;
     MaterialLoader(const MaterialLoader&) = delete;
