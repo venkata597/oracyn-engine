@@ -3,6 +3,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_video.h>
 #include <iostream>
+#include "../../include/resources/inputhandler.hpp"
 
 
 void AppWindow::_create_window(const char* title){
@@ -32,7 +33,7 @@ void AppWindow::_create_window(const char* title){
         std::cout << "[ORACYN (WINDOWING)]: Unable to initialize GLEW" << '\n';
     }
 
-    std::cout << glGetString(GL_VERSION) << '\n';   
+    std::cout << glGetString(GL_VERSION) << '\n';
 }
 
 AppWindow::AppWindow(const char* title){
@@ -53,13 +54,16 @@ AppWindow::AppWindow(const char* title){
 
 void AppWindow::handleEvents(){
     while(SDL_PollEvent(&event)){
-        if(event.type == SDL_QUIT){
-            this->status = false;
-        }
-        else if(event.type==SDL_WINDOWEVENT){
-            if(event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
-                this->resized = true;
-            }
+        switch(event.type){
+            case SDL_QUIT:
+                this->status = false;
+                break;
+            case SDL_KEYUP:
+                input.keys[event.key.keysym.scancode] = true;
+                break;
+            case SDL_KEYDOWN:
+                input.keys[event.key.keysym.scancode] = false;
+                break;
         }
     }
 }
@@ -92,4 +96,3 @@ AppWindow::~AppWindow(){
     window = nullptr;
     SDL_Quit();
 }
-

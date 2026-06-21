@@ -1,15 +1,19 @@
 #include "../../include/resources/assetloader.hpp"
 #include <filesystem>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 std::unordered_map<std::string,unsigned int> AssetMap::map;
-std::unordered_map<unsigned int,AssetData> AssetLoader::asset_map;
 
 unsigned int AssetLoader::_id = 100;
 
 unsigned int AssetMap::getAssetID(std::string aname){
-    return AssetMap::map[aname];
+    auto it = AssetMap::map.find(aname);
+    if(it == map.end()){
+        throw std::runtime_error("[ORACYN (ASSET)]: Asset not found");
+    }
+    return it->second;
 }
 
 
@@ -43,13 +47,12 @@ void AssetLoader::loadAsset(std::string aname){
         else{
             continue;
         }
-    } 
+    }
 
     if(modelfile.empty()){
         std::cout << "[ORACYN (AssetLoader)]: Failed to find the .gltf file for " << aname << " model" << '\n';
         return;
     }
-    _register_asset(aname);
 
     cgltf_data* data;
     modelLoader.loadModel(path+modelfile);
@@ -58,6 +61,8 @@ void AssetLoader::loadAsset(std::string aname){
     AssetData ad;
     ad.meshes = meshloader.constructMesh(data);
     ad.materials = std::move(materialloader.constructMaterial(data,path));
-    
+
+
+    _register_asset(aname);
     asset_map[AssetMap::getAssetID(aname)] = std::move(ad);
 }

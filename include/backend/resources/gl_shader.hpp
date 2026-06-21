@@ -1,40 +1,28 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <iostream>
 #include <string>
 
 namespace Backend{
-    static struct ShaderProgram{
+
+    enum SHADER_TYPE{
+        VERTEX_SHADER = GL_VERTEX_SHADER,
+        FRAGMENT_SHADER = GL_FRAGMENT_SHADER
+    };
+
+    class ShaderProgram{
     private:
-        static unsigned int id;
-        static int success;
-        static char log[512];
+        unsigned int id;
+        int success;
+        char log[512];
     public:
-        static void createProgram(){
-            id = glCreateProgram();
-        }
-
-        static void attachShader(unsigned int shader){
-            glAttachShader(id,shader);
-        }
-
-        static void linkShader(){
-            glLinkProgram(id);
-            glGetProgramiv(id,GL_LINK_STATUS,&success);
-            
-            if(!success){
-                glGetProgramInfoLog(id,512,NULL,log);
-                std::cout << "[ORACYN (BACKEND)]: Failed to link shader program" << log << '\n';
-            }
-        }
-
-
-        static void deleteProgram(){
-            glDeleteProgram(id);
-        }
-
-    }ShaderProgram;
+        void createProgram();
+        void attachShader(unsigned int shader);
+        void linkShader();
+        void useShaderProgram();
+        void deleteProgram();
+        const unsigned int& getShaderID() {return id;}
+    };
 
     std::string _read_from_file(const std::string& filepath);
 
@@ -47,7 +35,7 @@ namespace Backend{
         int success;
         char log[512];
     public:
-        void createShader();
+        void createShader(const std::string& source,SHADER_TYPE type);
         void compileShader();
         unsigned int getShaderID();
 

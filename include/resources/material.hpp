@@ -15,6 +15,8 @@ struct Deleter{
     void operator()(unsigned char* p) {stbi_image_free(p);}
 };
 
+using ImageDataPtr = std::unique_ptr<unsigned char [],Deleter>;
+
 struct Texture{
 
     unsigned int texID;
@@ -24,7 +26,7 @@ struct Texture{
 
     int width,height,nchannels;
 
-    std::unique_ptr<unsigned char [],Deleter> img_data;
+    ImageDataPtr img_data;
 };
 
 Texture loadTexture(std::string filepath);

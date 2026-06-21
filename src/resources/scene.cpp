@@ -1,7 +1,6 @@
 #include "../../include/resources/scene.hpp"
 #include <fstream>
 #include <iostream>
-#include <iomanip>
 
 
 void Scene::_load_entity(std::string n,glm::vec3 trans,glm::vec3 rot,glm::vec3 scl,float angle){
@@ -23,10 +22,10 @@ void Scene::loadScene(const std::string& filepath){
     if(!file.is_open()){
         std::cerr << "[ORACYN (Scene)]: Failed to load scene file: "  << filepath << "." << '\n';
         return;
-    }    
+    }
     json root;
     file >> root;
-    file.clear();
+    file.close();
 
 
     for(const auto& entity: root["entities"]){

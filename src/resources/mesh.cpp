@@ -17,7 +17,7 @@ std::vector<Mesh> MeshLoader::constructMesh(cgltf_data* data){
             cgltf_accessor* positionaccessor = nullptr;
             cgltf_accessor* uvaccessor = nullptr;
             cgltf_accessor* normalaccessor = nullptr;
-        
+
             for(cgltf_size j = 0;j<primitive->attributes_count;++j){
 
                 cgltf_attribute* attr = &primitive->attributes[j];
@@ -37,7 +37,7 @@ std::vector<Mesh> MeshLoader::constructMesh(cgltf_data* data){
             }
 
             pdata.vertices.reserve(positionaccessor->count);
-            
+
             cgltf_size vc = positionaccessor->count;
 
             for(cgltf_size j = 0;j<vc;++j){
@@ -46,7 +46,7 @@ std::vector<Mesh> MeshLoader::constructMesh(cgltf_data* data){
 
                 {
                     float pos[3];
-            
+
                     cgltf_accessor_read_float(
                     positionaccessor,
                     j,
@@ -58,7 +58,7 @@ std::vector<Mesh> MeshLoader::constructMesh(cgltf_data* data){
                 }
 
                 if(uvaccessor){
-        
+
                     float uv[2];
                     cgltf_accessor_read_float(
                     uvaccessor,
@@ -82,16 +82,23 @@ std::vector<Mesh> MeshLoader::constructMesh(cgltf_data* data){
                 }
                 pdata.vertices.push_back(v);
             }
-        
+
 
             cgltf_accessor* indexaccessor = primitive->indices;
-            pdata.indices.reserve(indexaccessor->count);
-            for(cgltf_size k = 0 ;k<indexaccessor->count;++k){
-                cgltf_uint index = cgltf_accessor_read_index(
-                indexaccessor,
-                k
-                );
-                pdata.indices.push_back((uint32_t)index);
+            if(!indexaccessor){
+                for(uint32_t k = 0;k<(uint32_t)positionaccessor->count;++k){
+                    pdata.indices.push_back(k);
+                }
+            }
+            else{
+                pdata.indices.reserve(indexaccessor->count);
+                for(cgltf_size k = 0 ;k<indexaccessor->count;++k){
+                    cgltf_uint index = cgltf_accessor_read_index(
+                    indexaccessor,
+                    k
+                    );
+                    pdata.indices.push_back((uint32_t)index);
+                }
             }
             pdata.material_index = primitive->material ? static_cast<uint32_t>(primitive->material - data->materials) : UINT32_MAX;
             m.primitives.push_back(pdata);
@@ -100,4 +107,3 @@ std::vector<Mesh> MeshLoader::constructMesh(cgltf_data* data){
     }
     return meshes;
 }
-

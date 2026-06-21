@@ -10,43 +10,13 @@
         {
           "id": 101,
           "translate": [0.0, 0.0, 0.0],
-          "rotate": [0.0,1.0,0.0,90.0],
+          "rotate": [0.0, 1.0, 0.0, 90.0],
           "scale": [0.5, 0.5, 0.5]
         },
         {
           "id": 102,
           "translate": [3.0, 0.0, 0.0],
-          "rotate": [0.0, 1.0, 0.0,90.0],
-          "scale": [0.5, 0.5, 0.5]
-        }
-      ]
-    },
-    {
-      "type": "sensor",
-      "name": "detector",
-      "modelpath": "detector",
-      "has_instances": true,
-      "instance_count": 1,
-      "instances":[
-        {
-          "id": 201,
-          "translate": [4.0, 0.0, 0.0],
-          "rotate": [0.0,1.0,0.0,90.0],
-          "scale": [0.5, 0.5, 0.5]
-        }
-      ]
-    },
-    {
-      "type": "sensor",
-      "name": "iPod",
-      "modelpath": "iPod",
-      "has_instances": true,
-      "instance_count": 1,
-      "instances":[
-        {
-          "id": 201,
-          "translate": [10.0, 0.0, 0.0],
-          "rotate": [0.0,1.0,0.0,90.0],
+          "rotate": [0.0, 1.0, 0.0, 90.0],
           "scale": [0.5, 0.5, 0.5]
         }
       ]

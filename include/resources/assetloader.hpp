@@ -10,6 +10,7 @@
 struct cgltf_data;
 
 class AssetLoader;
+class RenderContext;
 
 class AssetMap{
 private:
@@ -25,6 +26,7 @@ struct AssetData{
 };
 
 class AssetLoader{
+    friend class RenderContext;
 private:
 
     std::string assetpath = "assets/";
@@ -34,18 +36,19 @@ private:
     MaterialLoader materialloader;
 
     gltfLoader modelLoader;
-    
+
     static unsigned int _id;
-    
+
     std::vector<std::string> _get_file_contents(std::string path);
 
     void _register_asset(std::string name);
 
-    static std::unordered_map<unsigned int,AssetData> asset_map;
+    std::unordered_map<unsigned int,AssetData> asset_map;
 
 public:
     void loadAsset(std::string assetname);
-    static const AssetData& getAssetDataByID(unsigned int id){ return asset_map.at(id);}
+    const AssetData& getAssetDataByID(unsigned int id){ return asset_map.at(id);}
+
 
     AssetLoader() = default;
     AssetLoader(const AssetLoader&) = delete;
