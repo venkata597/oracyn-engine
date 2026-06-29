@@ -19,12 +19,18 @@ private:
     float near_plane = 0.1f;
     float far_plane = 100.0f;
 
-    glm::mat4 projection = glm::perspective(fov,aspect,near_plane,far_plane);
+    glm::mat4 projection = glm::perspective(glm::radians(fov),aspect,near_plane,far_plane);
+
+
+    float yaw = -90.0f;
+    float pitch = 0.0f;
+    float sensitivity = 0.1f;
 
 private:
-    void _update_camera();
+    void _update_camera(float delta_time);
 public:
-    void update();
+    void update(float delta_time);
     const glm::mat4& getViewMatrix() {return view;}
     const glm::mat4& getProjectionMatrix() {return projection;}
+    const glm::vec3& getPositionVec() {return _camera_pos;}
 };

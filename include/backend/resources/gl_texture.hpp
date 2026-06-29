@@ -25,6 +25,6 @@ namespace Backend{
 
         void createTexture();
         void bindTexture(TEXTURE_TYPE tex_type);
-        void uploadTextureData(Texture texture_data,TEXTURE_TYPE type);
+        void uploadTextureData(Texture&& texture_data,TEXTURE_TYPE type);
     };
 }

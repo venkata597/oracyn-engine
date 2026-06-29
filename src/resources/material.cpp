@@ -94,7 +94,7 @@ std::vector<MaterialData> MaterialLoader::constructMaterial(cgltf_data* data,std
             }
             else{
                 data.occlusion = std::move(occlusion);
-                data.occlusionStrength = material->occlusion_texture.scale;   
+                data.occlusionStrength = material->occlusion_texture.scale;
             }
         }
 
@@ -113,7 +113,7 @@ std::vector<MaterialData> MaterialLoader::constructMaterial(cgltf_data* data,std
                     material->emissive_factor[1],
                     material->emissive_factor[2]
                 );
-                
+
             }
         }
 
@@ -136,4 +136,8 @@ std::vector<MaterialData> MaterialLoader::constructMaterial(cgltf_data* data,std
         materials.push_back(std::move(data));
     }
     return std::move(materials);
+}
+
+MaterialLoader::MaterialLoader(){
+    stbi_set_flip_vertically_on_load(true);
 }

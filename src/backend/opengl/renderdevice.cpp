@@ -11,6 +11,8 @@ void Backend::GLRenderDevice::_init_device(){
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(1.0f,1.0f);
 }
 
 void Backend::GLRenderDevice::_make_shaders(){
@@ -38,17 +40,21 @@ void Backend::GLRenderDevice::_set_location_bindings(){
     glUniform1i(glGetUniformLocation(shader_program.getShaderID(),"emissive"),2);
     glUniform1i(glGetUniformLocation(shader_program.getShaderID(),"occlusion"),3);
     glUniform1i(glGetUniformLocation(shader_program.getShaderID(),"mr"),4);
+
+    glm::vec3 lightdir = glm::normalize(glm::vec3(-0.5f,-1.0f,-0.3f));
+    glUniform3f(glGetUniformLocation(shader_program.getShaderID(),"ulightDir"),lightdir.x,lightdir.y,lightdir.z);
+    glUniform3f(glGetUniformLocation(shader_program.getShaderID(),"ulightColor"),1.0f,1.0f,1.0f);
 }
 
 Backend::GLRenderDevice::GLRenderDevice(){
     _init_device();
     _make_shaders();
+    camera_ubo.createUniformBufferObject();
+    shader_program.useShaderProgram();
     _set_location_bindings();
-    vertex_array_obj.createVAO();
-    vertex_array_obj.bind();
+    camera_ubo.bindUniformBufferObject();
+    camera_ubo.bindUniformBufferData();
     ib.create();
-    ib.bind();
-    vertex_array_obj.setAttribPointers();
 }
 
 void Backend::GLRenderDevice::clearScreen(){
@@ -56,33 +62,57 @@ void Backend::GLRenderDevice::clearScreen(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Backend::GLRenderDevice::submitState(RenderState& state){
-    this->state = state;
+void Backend::GLRenderDevice::submitState(RenderState&& state){
+    this->state = std::move(state);
+}
+
+void Backend::GLRenderDevice::_draw_node(GPUNode& node,GPUScene& scene,std::vector<GPUMaterial>& materials,std::vector<glm::mat4>& eTransforms){
+    node.nodeUBO.bindUniformBufferObject();
+    node.nodeUBO.updateUniformBufferData();
+
+    ib.bind();
+    ib.setData(eTransforms);
+
+    if(node.hasGPUMesh){
+        for(auto& prim: scene.getMesh(node.meshIndex)){
+            materials[prim.materialIndex].ubo.bindUniformBufferObject();
+            materials[prim.materialIndex].ubo.updateUniformBufferData();
+            materials[prim.materialIndex].bind();
+            prim.vao.bind();
+            ib.bind();
+            glDrawElementsInstanced(GL_TRIANGLES,prim.getIndicesCount(),GL_UNSIGNED_INT,nullptr,eTransforms.size());
+        }
+    }
+    else{
+        for(auto& child_node: node.child_nodes){
+            _draw_node(child_node,scene,materials,eTransforms);
+        }
+    }
 }
 
 void Backend::GLRenderDevice::drawScene(){
-    vertex_array_obj.bind();
-    ib.bind();
-    for(const auto& cmd: state.draw_queue){
-        auto& [meshes,materials] = RenderContext::gpuResourceMap.at(cmd.assetID);
+    shader_program.useShaderProgram();
 
-        std::vector<glm::mat4> transforms;
-        transforms.reserve(cmd.transforms.size());
+    camera_ubo.data.uView = state.cam_data.view;
+    camera_ubo.data.uProj = state.cam_data.proj;
+    camera_ubo.data.uPos = state.cam_data.pos;
+
+    camera_ubo.bindUniformBufferObject();
+    camera_ubo.updateUniformBufferData();
+
+
+    for(const auto& cmd: state.draw_queue){
+        auto& [scene,materials] = RenderContext::gpuResourceMap.at(cmd.assetID);
+
+        std::vector<glm::mat4> entityTransforms;
+        entityTransforms.reserve(cmd.transforms.size());
 
         for(const auto& transform: cmd.transforms){
-            transforms.push_back(transform.matrix);
+            entityTransforms.push_back(transform.getTransform());
         }
-        ib.setData(transforms);
 
-        for(auto& mesh: meshes){
-            if(mesh.getMaterialIndex() == UINT32_MAX){
-                continue;
-            }
-            materials[mesh.getMaterialIndex()].ubo.bindUniformBufferObject();
-            materials[mesh.getMaterialIndex()].ubo.updateUniformBufferData();
-            materials[mesh.getMaterialIndex()].bind();
-            mesh.bindMesh();
-            glDrawElementsInstanced(GL_TRIANGLES,mesh.getIndicesCount(),GL_UNSIGNED_INT,nullptr,transforms.size());
+        for(auto& node: scene.gScene){
+            _draw_node(node,scene,materials,entityTransforms);
         }
     }
 }

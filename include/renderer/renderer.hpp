@@ -2,7 +2,15 @@
 
 #include "../resources/entity.hpp"
 #include "../resources/scene.hpp"
+#include "../resources/camera.hpp"
 #include <vector>
+
+struct CameraData{
+    glm::mat4 view;
+    glm::mat4 proj;
+    glm::vec3 pos;
+};
+
 
 struct DrawCommand{
     unsigned int assetID;
@@ -11,7 +19,7 @@ struct DrawCommand{
 };
 
 struct RenderState{
-    SceneMap map;
+    CameraData cam_data;
     std::vector<DrawCommand> draw_queue;
 };
 
@@ -21,6 +29,8 @@ private:
 
     void _build_render_queue(const SceneMap& map);
 public:
+    void beginFrame(Camera cam);
     void draw(const SceneMap& map);
-    const std::vector<DrawCommand>& getQueue();
+    void endFrame();
+    RenderState getState();
 };

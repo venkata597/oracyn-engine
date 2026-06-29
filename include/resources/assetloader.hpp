@@ -21,7 +21,7 @@ public:
 };
 
 struct AssetData{
-    std::vector<Mesh> meshes;
+    std::vector<NodeData> model;
     std::vector<MaterialData> materials;
 };
 

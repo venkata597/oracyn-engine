@@ -1,10 +1,13 @@
 #pragma once
 
 #include <cstddef>
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
+
+#include "transform.hpp"
 
 inline void hash_combine(std::size_t& seed,const std::string& v){
     std::hash<std::string> hasher;
@@ -14,19 +17,6 @@ inline void hash_combine(std::size_t& seed,unsigned int v){
     std::hash<unsigned int> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
-
-struct Transform{
-
-    enum Mode{
-        TRANSLATE, 
-        ROTATE,
-        SCALE
-    };
-
-    glm::mat4 matrix = glm::mat4(1.0f);
-    
-    void apply_transform(Transform::Mode mode,glm::vec3 param,float angle = 0.0f);
-};
 
 class Entity{
 private:
@@ -38,7 +28,7 @@ public:
 
     Transform transform;
 
-    void makeEntity(std::string n,unsigned int assetid,glm::vec3 trans,glm::vec3 rotate,glm::vec3 scale,float angle);
+    void makeEntity(std::string n,unsigned int assetid,glm::vec3 trans,glm::quat rotate,glm::vec3 scale);
 
     bool operator==(const Entity& other) const {
         return name==other.name && assetID==other.assetID;

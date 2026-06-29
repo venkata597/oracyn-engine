@@ -25,13 +25,11 @@ namespace Backend{
         void updateUniformBufferData() override;
 
         MaterialUBO(){
-            glBindBufferBase(GL_UNIFORM_BUFFER,0,id);
+            bindUniformBufferData();
         }
     };
 
     class GPUMaterial{
-    private:
-        MaterialData material_data;
     private:
         GPUTexture albedo;
         GPUTexture normal;

@@ -3,6 +3,7 @@
 #include "assetloader.hpp"
 #include "entity.hpp"
 #include "../../include/json/json.hpp"
+#include <glm/fwd.hpp>
 #include <unordered_map>
 
 using json = nlohmann::json;
@@ -10,18 +11,19 @@ using json = nlohmann::json;
 using SceneMap = std::unordered_map<Entity,std::vector<Transform>,EntityHasher>;
 
 class Scene{
+    friend class RenderContext;
 private:
 
     AssetLoader loader;
     std::vector<Entity> entities;
     SceneMap instances;
 
-    void _load_entity(std::string n,glm::vec3 trans,glm::vec3 rot,glm::vec3 scl,float angle = 0.0f);
+    void _load_entity(std::string n,glm::vec3 trans,glm::quat rot,glm::vec3 scl);
     void _map_entities();
-    
+
 public:
     void loadScene(const std::string& filepath);
-    SceneMap getScene();
+    const SceneMap& getScene();
 
     Scene() = default;
 

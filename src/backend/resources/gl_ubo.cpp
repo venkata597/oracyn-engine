@@ -11,3 +11,5 @@ void Backend::UBO::bindUniformBufferObject(){
 void Backend::UBO::unbindUniformBufferObject(){
     glBindBuffer(GL_UNIFORM_BUFFER,0);
 }
+
+Backend::UBO::~UBO(){}

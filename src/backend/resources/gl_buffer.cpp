@@ -1,4 +1,5 @@
 #include "../../../include/backend/resources/gl_buffer.hpp"
+#include <cstddef>
 #include <cstdint>
 
 void Backend::VAO::createVAO(){
@@ -16,8 +17,12 @@ void Backend::VAO::setAttribPointers(){
     glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)offsetof(Vertex,uv));
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)offsetof(Vertex,normals));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(void*)offsetof(Vertex,tangents));
+}
 
-    unsigned int location = 3;
+void Backend::VAO::setInstanceAttribPointers(){
+    unsigned int location = 4;
     for(int i = 0;i<4;i++){
         glEnableVertexAttribArray(location+i);
         glVertexAttribPointer(

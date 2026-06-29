@@ -59,7 +59,7 @@ void AssetLoader::loadAsset(std::string aname){
     data = modelLoader.getData(path+modelfile);
 
     AssetData ad;
-    ad.meshes = meshloader.constructMesh(data);
+    ad.model = meshloader.constructModel(data);
     ad.materials = std::move(materialloader.constructMaterial(data,path));
 
 

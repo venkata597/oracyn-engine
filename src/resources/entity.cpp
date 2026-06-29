@@ -1,33 +1,19 @@
 #include "../../include/resources/entity.hpp"
+#include <glm/gtc/quaternion.hpp>
 
 unsigned int Entity::_id = 0;
 
-void Transform::apply_transform(Transform::Mode mode,glm::vec3 param,float angle){
-    switch(mode){
-        case Transform::Mode::TRANSLATE:
-            matrix = glm::translate(matrix,param);
-            break;
-        case Transform::Mode::ROTATE:
-            matrix = glm::rotate(matrix,angle,param);
-            break;
-        case Transform::Mode::SCALE:
-            matrix = glm::scale(matrix,param);
-            break;
-    }
-}
-
-
-void Entity::makeEntity(std::string n,unsigned int assetid,glm::vec3 trans,glm::vec3 rotate,glm::vec3 scale,float angle){
+void Entity::makeEntity(std::string n,unsigned int assetid,glm::vec3 trans,glm::quat rotate,glm::vec3 scale){
     this->name = n;
     this->ID = _id++;
     this->assetID = assetid;
     if(trans!=glm::vec3(0.0f)){
-        this->transform.apply_transform(Transform::TRANSLATE,trans);
+        this->transform.translate = trans;
     }
-    if(rotate!=glm::vec3(0.0f)){
-        this->transform.apply_transform(Transform::ROTATE,rotate,angle);
+    if(rotate!=glm::quat(0.0f,0.0f,0.0f,0.0f)){
+        this->transform.rotation = rotate;
     }
     if(scale!=glm::vec3(0.0f)){
-        this->transform.apply_transform(Transform::SCALE,scale);
+        this->transform.scale = scale;
     }
 }

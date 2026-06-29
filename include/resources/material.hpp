@@ -66,12 +66,12 @@ struct MaterialData{
     bool doubleSided;
 };
 
-class MaterialLoader{   
+class MaterialLoader{
 private:
 public:
     std::vector<MaterialData> constructMaterial(cgltf_data* data,std::string p);
 
-    MaterialLoader() = default;
+    MaterialLoader();
     MaterialLoader(const MaterialLoader&) = delete;
     MaterialLoader operator=(const MaterialLoader&) = delete;
 };

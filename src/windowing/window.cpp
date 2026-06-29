@@ -2,6 +2,7 @@
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL_mouse.h>
 #include <iostream>
 #include "../../include/resources/inputhandler.hpp"
 
@@ -33,7 +34,7 @@ void AppWindow::_create_window(const char* title){
         std::cout << "[ORACYN (WINDOWING)]: Unable to initialize GLEW" << '\n';
     }
 
-    std::cout << glGetString(GL_VERSION) << '\n';
+    SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
 AppWindow::AppWindow(const char* title){
@@ -63,6 +64,10 @@ void AppWindow::handleEvents(){
                 break;
             case SDL_KEYDOWN:
                 input.keys[event.key.keysym.scancode] = false;
+                break;
+            case SDL_MOUSEMOTION:
+                input.mouse_delta_x = (float)event.motion.xrel;
+                input.mouse_delta_y = (float)event.motion.yrel;
                 break;
         }
     }

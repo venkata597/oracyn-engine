@@ -48,12 +48,12 @@ void Backend::GPUMaterial::makeGPUMaterial(MaterialData material_data){
     metallic_roughness.bindTexture(METALLIC_ROUGNESS);
     metallic_roughness.uploadTextureData(std::move(material_data.pbr.metallicRoughnessTexture),METALLIC_ROUGNESS);
 
-    ubo.data.uBaseColor = material_data.pbr.baseColorFactor;
-    ubo.data.uRoughnessFactor = material_data.pbr.roughnessFactor;
-    ubo.data.uMetallicFactor = material_data.pbr.metallicFactor;
-    ubo.data.uEmissiveFactor = material_data.emissiveFactor;
-    ubo.data.uEmissiveStrength = material_data.emissiveStrength;
-    ubo.data.uOcclusionStrength = material_data.occlusionStrength;
+    ubo.data.uBaseColor = std::move(material_data.pbr.baseColorFactor);
+    ubo.data.uRoughnessFactor = std::move(material_data.pbr.roughnessFactor);
+    ubo.data.uMetallicFactor = std::move(material_data.pbr.metallicFactor);
+    ubo.data.uEmissiveFactor = std::move(material_data.emissiveFactor);
+    ubo.data.uEmissiveStrength = std::move(material_data.emissiveStrength);
+    ubo.data.uOcclusionStrength = std::move(material_data.occlusionStrength);
 }
 
 void Backend::GPUMaterial::bind(){

@@ -1,23 +1,23 @@
 {
   "entities": [
     {
-      "type": "helmet",
+      "type": "boombox",
       "name": "flighthelmet",
       "modelpath": "flighthelmet",
       "has_instances": true,
-      "instance_count": 2,
+      "instance_count": 1,
       "instances": [
         {
           "id": 101,
           "translate": [0.0, 0.0, 0.0],
-          "rotate": [0.0, 1.0, 0.0, 90.0],
-          "scale": [0.5, 0.5, 0.5]
+          "rotate": [0.0, 0, 0.0, 0],
+          "scale": [1, 1, 1]
         },
         {
           "id": 102,
           "translate": [3.0, 0.0, 0.0],
-          "rotate": [0.0, 1.0, 0.0, 90.0],
-          "scale": [0.5, 0.5, 0.5]
+          "rotate": [0.0, 0, 0.0, 0],
+          "scale": [1, 1, 1]
         }
       ]
     }

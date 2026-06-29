@@ -45,6 +45,7 @@ std::string Backend::_read_from_file(const std::string& filepath){
 
 void Backend::Shader::createShader(const std::string& source,SHADER_TYPE type){
     shader_id = glCreateShader(type);
+    shader_source = _read_from_file(source);
     if(this->shader_source.empty()){
         std::cout << "[ORACYN (BACKEND)]: Shader source is empty" << '\n';
         return;
@@ -62,6 +63,10 @@ void Backend::Shader::compileShader(){
         glGetShaderInfoLog(shader_id,512,NULL,log);
         std::cout << "[ORACYN (BACKEND)]: Failed to compile shader: " << log << '\n';
     }
+}
+
+void Backend::Shader::deleteShader(){
+    glDeleteShader(shader_id);
 }
 
 unsigned int Backend::Shader::getShaderID(){

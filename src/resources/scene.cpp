@@ -1,13 +1,14 @@
 #include "../../include/resources/scene.hpp"
 #include <fstream>
+#include <glm/fwd.hpp>
 #include <iostream>
 
 
-void Scene::_load_entity(std::string n,glm::vec3 trans,glm::vec3 rot,glm::vec3 scl,float angle){
+void Scene::_load_entity(std::string n,glm::vec3 trans,glm::quat rot,glm::vec3 scl){
     Entity e;
     unsigned int assetID;
     assetID = AssetMap::getAssetID(n);
-    e.makeEntity(n,assetID,trans,rot,scl,angle);
+    e.makeEntity(n,assetID,trans,rot,scl);
     entities.push_back(e);
 }
 
@@ -30,8 +31,8 @@ void Scene::loadScene(const std::string& filepath){
 
     for(const auto& entity: root["entities"]){
         loader.loadAsset(entity.value("modelpath",""));
-        glm::vec3 trans,rot,scale;
-        float angle;
+        glm::vec3 trans,scale;
+        glm::quat rot;
         if(entity.contains("instances")){
             for(const auto& instance: entity["instances"]){
                 for(int i = 0;i<3;i++){
@@ -39,13 +40,12 @@ void Scene::loadScene(const std::string& filepath){
                     rot[i] = instance["rotate"][i].get<float>();
                     scale[i] = instance["scale"][i].get<float>();
                 }
-                angle = instance["rotate"][3].get<float>();
+                rot[3] = instance["rotate"][3].get<float>();
                 _load_entity(
                     entity.value("name",""),
                     trans,
                     rot,
-                    scale,
-                    angle
+                    scale
                 );
             }
         }
@@ -53,6 +53,6 @@ void Scene::loadScene(const std::string& filepath){
     _map_entities();
 }
 
-SceneMap Scene::getScene(){
-    return std::move(instances);
+const SceneMap& Scene::getScene(){
+    return instances;
 }
