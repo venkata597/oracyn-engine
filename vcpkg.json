@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.json.schema",
+  "name": "oracyn",
+  "version-string": "0.0.1",
+  "dependencies": [
+    "sdl2",
+    "glm",
+    "glew",
+    "opengl"
+  ]
+}

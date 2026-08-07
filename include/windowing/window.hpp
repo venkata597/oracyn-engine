@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_error.h>
+#include <utility>
 
 #define WINDOW_WIDTH 1366
 #define WINDOW_HEIGHT 728

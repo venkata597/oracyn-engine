@@ -4,7 +4,8 @@
 #include "../include/oracyn.hpp"
 
 
-int main(){
+int main(int argc,char* argv[]){
+    (void)argc;(void)argv;
     AppWindow window("Test Engine");
     Scene scene;
     scene.loadScene("scenes/scene.json");
@@ -36,4 +37,5 @@ int main(){
 
         window.swapBuffers();
     }
+    return 0;
 }
