@@ -62,10 +62,6 @@ if %ERRORLEVEL% neq 0 (
 
     set "NEEDS_RERUN=1"
 
-    :: If Zed is installed on this machine, installing pwsh alongside the
-    :: existing Windows PowerShell 5.1 is known to break Zed's terminal
-    :: ("can't spawn terminal") because its default-shell resolution gets
-    :: confused. Pin Zed's terminal shell explicitly to avoid that.
     if exist "%APPDATA%\Zed" (
         echo [INFO] Zed detected - pinning its terminal shell to avoid a known conflict...
         for /f "usebackq delims=" %%p in (`where pwsh 2^>nul`) do set "PWSH_PATH=%%p"
@@ -125,10 +121,17 @@ echo [INFO] MSVC compiler found:
 where cl.exe
 
 :: =========================================================
-:: 5. Install or update vcpkg (lives at C:\vcpkg, shared by
-::    all projects that use this script)
+:: 5. Install or update vcpkg (lives at C:\vcpkg)
 :: =========================================================
 set "VCPKG_ROOT=C:\vcpkg"
+
+:: Clean up non-git or half-cloned directory to avoid 'destination path already exists' error
+if exist "%VCPKG_ROOT%" (
+    if not exist "%VCPKG_ROOT%\.git" (
+        echo [INFO] Cleaning up incomplete vcpkg folder at %VCPKG_ROOT%...
+        rmdir /s /q "%VCPKG_ROOT%"
+    )
+)
 
 if not exist "%VCPKG_ROOT%\.git" (
     echo [INFO] Installing vcpkg to %VCPKG_ROOT%...
@@ -147,25 +150,21 @@ if not exist "%VCPKG_ROOT%\.git" (
 
 if not exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo [INFO] Bootstrapping vcpkg...
-    call "%VCPKG_ROOT%\bootstrap-vcpkg.bat" -disableMetrics
+    :: Use 'cmd /c' so if bootstrap calls exit, it does NOT kill pre_build.bat
+    cmd /c "%VCPKG_ROOT%\bootstrap-vcpkg.bat" -disableMetrics
 
     if not exist "%VCPKG_ROOT%\vcpkg.exe" (
-        echo [INFO] Bootstrap failed - trying curl fallback...
-        where curl.exe >nul 2>&1
-        if !ERRORLEVEL! equ 0 (
-            powershell -NoProfile -Command ^
-                "$r = Invoke-RestMethod -Uri 'https://api.github.com/repos/microsoft/vcpkg-tool/releases/latest'; $a = $r.assets | Where-Object { $_.name -eq 'vcpkg.exe' }; Invoke-WebRequest -Uri $a.browser_download_url -OutFile '%VCPKG_ROOT%\vcpkg.exe'"
-        )
+        echo [INFO] Standard bootstrap failed - downloading release binary directly...
+        powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+            "$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $url = 'https://github.com/microsoft/vcpkg-tool/releases/latest/download/vcpkg.exe'; Invoke-WebRequest -Uri $url -OutFile '%VCPKG_ROOT%\vcpkg.exe'"
     )
 )
 
 if not exist "%VCPKG_ROOT%\vcpkg.exe" (
     echo [ERROR] vcpkg.exe could not be installed automatically.
-    echo [ERROR] This machine's network may be blocking GitHub release downloads.
     echo [ERROR] Manually download it from:
     echo [ERROR]   https://github.com/microsoft/vcpkg-tool/releases/latest
     echo [ERROR] and place it at %VCPKG_ROOT%\vcpkg.exe
-    echo [ERROR] Then re-run this script.
     pause
     exit /b 1
 )
