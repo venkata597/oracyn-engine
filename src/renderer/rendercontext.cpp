@@ -11,6 +11,7 @@ void RenderContext::uploadToGPU(Scene& scene,Backend::GLRenderDevice& render_dev
         scene.constructScene(asset_data.model,glm::mat4(1.0f),render_device.getInstanceBufferID());
         gpu_asset.scene = std::move(scene);
 
+        std::cout << "CPU materials: " << asset_data.materials.size() << std::endl;
         for(auto& material: asset_data.materials){
             Backend::GPUMaterial gpu_material;
             gpu_material.makeGPUMaterial(std::move(material));

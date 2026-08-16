@@ -9,7 +9,6 @@ struct cgltf_data;
 struct cgltf_node;
 struct cgltf_mesh;
 
-
 typedef struct{
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;

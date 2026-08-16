@@ -107,7 +107,12 @@ std::vector<MaterialData> MaterialLoader::constructMaterial(cgltf_data* data,std
             }
             else{
                 data.emissive = std::move(emissive);
-                data.emissiveStrength = material->emissive_strength.emissive_strength;
+                if(material->has_emissive_strength){
+                    data.emissiveStrength = material->emissive_strength.emissive_strength;
+                }
+                else{
+                    data.emissiveStrength = 1.0f;
+                }
                 data.emissiveFactor = glm::vec3(
                     material->emissive_factor[0],
                     material->emissive_factor[1],
@@ -139,5 +144,5 @@ std::vector<MaterialData> MaterialLoader::constructMaterial(cgltf_data* data,std
 }
 
 MaterialLoader::MaterialLoader(){
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
 }

@@ -36,4 +36,5 @@ void Camera::_update_camera(float delta_time){
 
 void Camera::update(float delta_time){
     _update_camera(delta_time);
+
 }

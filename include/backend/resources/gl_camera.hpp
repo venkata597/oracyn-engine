@@ -8,7 +8,7 @@ namespace Backend{
     struct CameraUBOData{
         glm::mat4 uView;
         glm::mat4 uProj;
-        glm::vec3 uPos;
+        glm::vec4 uPos;
     };
 
     class CameraUBO: public UBO{

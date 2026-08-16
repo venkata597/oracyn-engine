@@ -117,6 +117,12 @@ Mesh MeshLoader::_construct_mesh(cgltf_mesh* mesh){
             }
             p.vertices.push_back(v);
         }
+        std::cout << "mesh:" << m.name << " vertex count:" << p.vertices.size() << std::endl;
+                for(int dbg = 0; dbg < 3 && dbg < (int)p.vertices.size(); dbg++){
+                    auto& v = p.vertices[dbg];
+                    std::cout << "  vtx[" << dbg << "] pos:(" << v.position.x << ","
+                               << v.position.y << "," << v.position.z << ")" << std::endl;
+                }
         p.material_index = primitive->material ? static_cast<uint32_t>(primitive->material - _current_model_data->materials) : UINT32_MAX;
 
         m.primitives.push_back(p);
@@ -130,6 +136,8 @@ NodeData MeshLoader::_construct_node(cgltf_node* node){
 
     if(node->has_matrix){
         nde.localTransform.transform = glm::make_mat4(node->matrix);
+        nde.localTransform.transform[3][3] = 1.0f;
+
         nde.localTransform.hasMatrix = true;
     }else{
         nde.localTransform.hasMatrix = false;
@@ -138,7 +146,7 @@ NodeData MeshLoader::_construct_node(cgltf_node* node){
     node->has_translation ? nde.localTransform.translate = glm::make_vec3(node->translation)
         : nde.localTransform.translate = glm::vec3(0.0f);
 
-    node->has_rotation ? nde.localTransform.rotation = glm::make_quat(node->rotation)
+    node->has_rotation ? nde.localTransform.rotation = glm::quat(node->rotation[3],node->rotation[0],node->rotation[1],node->rotation[2])
         : nde.localTransform.rotation = glm::quat(1.0f,0.0f,0.0f,0.0f);
 
     node->has_scale ? nde.localTransform.scale = glm::make_vec3(node->scale)

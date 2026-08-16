@@ -1,23 +1,17 @@
 {
   "entities": [
     {
-      "type": "boombox",
-      "name": "flighthelmet",
-      "modelpath": "flighthelmet",
+      "type": "asset",
+      "name": "DamagedHelmet",
+      "modelpath": "DamagedHelmet",
       "has_instances": true,
       "instance_count": 1,
       "instances": [
         {
           "id": 101,
-          "translate": [0.0, 0.0, 0.0],
-          "rotate": [0.0, 0, 0.0, 0],
-          "scale": [1, 1, 1]
-        },
-        {
-          "id": 102,
-          "translate": [3.0, 0.0, 0.0],
-          "rotate": [0.0, 0, 0.0, 0],
-          "scale": [1, 1, 1]
+          "translate": [0,0,0],
+          "rotate": [0.0, 0.0, 0.0, 1.0],
+          "scale": [0.5,0.5,0.5]
         }
       ]
     }

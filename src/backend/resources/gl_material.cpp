@@ -51,7 +51,7 @@ void Backend::GPUMaterial::makeGPUMaterial(MaterialData material_data){
     ubo.data.uBaseColor = std::move(material_data.pbr.baseColorFactor);
     ubo.data.uRoughnessFactor = std::move(material_data.pbr.roughnessFactor);
     ubo.data.uMetallicFactor = std::move(material_data.pbr.metallicFactor);
-    ubo.data.uEmissiveFactor = std::move(material_data.emissiveFactor);
+    ubo.data.uEmissiveFactor = std::move(glm::vec4(material_data.emissiveFactor,0.0f));
     ubo.data.uEmissiveStrength = std::move(material_data.emissiveStrength);
     ubo.data.uOcclusionStrength = std::move(material_data.occlusionStrength);
 }

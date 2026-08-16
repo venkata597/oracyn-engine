@@ -10,13 +10,14 @@
 
 namespace Backend{
 
+
+
     struct GPUPrimitive{
         VAO vao;
         VertexBuffer vb;
         IndexBuffer ib;
         unsigned int materialIndex;
         unsigned int indices_count;
-
 
         GPUPrimitive() = default;
         GPUPrimitive(const GPUPrimitive&) = delete;
@@ -41,7 +42,7 @@ namespace Backend{
         GPUMesh& operator=(GPUMesh&&) = default;
     };
 
-    struct GPUNodeUBOData{
+    struct alignas(16) GPUNodeUBOData{
         glm::mat4 globalTransform;
     };
 

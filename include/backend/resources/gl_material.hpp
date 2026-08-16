@@ -13,7 +13,7 @@ namespace Backend{
         float uRoughnessFactor;
         float uOcclusionStrength;
         float uEmissiveStrength;
-        glm::vec3 uEmissiveFactor;
+        glm::vec4 uEmissiveFactor;
     };
 
     class MaterialUBO: public UBO{

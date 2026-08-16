@@ -5,11 +5,11 @@ in vec2 fuv;
 in vec3 fNormal;
 in vec4 fTangent;
 
-uniform sampler2D albedo;
-uniform sampler2D normal;
-uniform sampler2D emissive;
-uniform sampler2D occlusion;
-uniform sampler2D mr;
+layout(binding = 0) uniform sampler2D albedo;
+layout(binding = 1) uniform sampler2D normal;
+layout(binding = 2) uniform sampler2D emissive;
+layout(binding = 3) uniform sampler2D occlusion;
+layout(binding = 4) uniform sampler2D mr;
 
 layout (std140, binding = 0) uniform MaterialUBO{
     vec4 uBaseColor;
@@ -17,7 +17,7 @@ layout (std140, binding = 0) uniform MaterialUBO{
     float uRoughnessFactor;
     float uOcclusionStrength;
     float uEmissiveStrength;
-    vec3 uEmissiveFactor;
+    vec4 uEmissiveFactor;
 };
 
 layout (std140, binding = 1) uniform CameraUBO{
@@ -58,9 +58,10 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0){
 
 void main(){
     vec4 albedoSample = texture(albedo,fuv);
+    albedoSample.rgb = pow(albedoSample.rgb,vec3(2.2));
     vec4 normalSample = texture(normal,fuv);
     vec4 mrSample = texture(mr,fuv);
-    vec3 emissiveSample = texture(emissive,fuv).rgb;
+    vec3 emissiveSample = pow(texture(emissive,fuv).rgb,vec3(2.2));
     float occlusionSample = texture(occlusion,fuv).r;
 
     vec3 baseColor = albedoSample.rgb * uBaseColor.rgb;
@@ -96,7 +97,7 @@ void main(){
     float NdotL = max(dot(Nmapped,L),0.0);
     vec3 Lo = (kD * baseColor / PI + specular) * ulightColor * NdotL;
     vec3 ambient = vec3(0.15) * baseColor * mix(1.0, occlusionSample, uOcclusionStrength);
-    vec3 emissiveOut = emissiveSample * uEmissiveFactor * uEmissiveStrength;
+    vec3 emissiveOut = emissiveSample * uEmissiveFactor.rgb * uEmissiveStrength;
     vec3 color = ambient + Lo + emissiveOut;
     color = color/(color + vec3(1.0));
     color = pow(color,vec3(1.0/2.2));

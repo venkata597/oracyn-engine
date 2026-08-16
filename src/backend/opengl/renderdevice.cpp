@@ -11,6 +11,7 @@ void Backend::GLRenderDevice::_init_device(){
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.0f,1.0f);
 }
@@ -67,6 +68,7 @@ void Backend::GLRenderDevice::submitState(RenderState&& state){
 }
 
 void Backend::GLRenderDevice::_draw_node(GPUNode& node,GPUScene& scene,std::vector<GPUMaterial>& materials,std::vector<glm::mat4>& eTransforms){
+    std::cout << "DRAW CALL - hasMesh:" << node.hasGPUMesh << " meshIndex:" << node.meshIndex << std::endl;
     node.nodeUBO.bindUniformBufferObject();
     node.nodeUBO.updateUniformBufferData();
 
@@ -83,10 +85,8 @@ void Backend::GLRenderDevice::_draw_node(GPUNode& node,GPUScene& scene,std::vect
             glDrawElementsInstanced(GL_TRIANGLES,prim.getIndicesCount(),GL_UNSIGNED_INT,nullptr,eTransforms.size());
         }
     }
-    else{
-        for(auto& child_node: node.child_nodes){
-            _draw_node(child_node,scene,materials,eTransforms);
-        }
+    for(auto& child_node: node.child_nodes){
+        _draw_node(child_node,scene,materials,eTransforms);
     }
 }
 
@@ -95,7 +95,7 @@ void Backend::GLRenderDevice::drawScene(){
 
     camera_ubo.data.uView = state.cam_data.view;
     camera_ubo.data.uProj = state.cam_data.proj;
-    camera_ubo.data.uPos = state.cam_data.pos;
+    camera_ubo.data.uPos = glm::vec4(state.cam_data.pos,1.0f);
 
     camera_ubo.bindUniformBufferObject();
     camera_ubo.updateUniformBufferData();

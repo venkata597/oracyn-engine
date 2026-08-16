@@ -1,73 +1,200 @@
 @echo off
+setlocal EnableExtensions EnableDelayedExpansion
 
-set "VCPKG_ROOT=C:\vcpkg"
+cd /d "%~dp0"
 
-:: Remove problem configuration if present
-if exist "vcpkg-configuration.json" del /f /q "vcpkg-configuration.json"
+echo =========================================================
+echo Oracyn - Build
+echo =========================================================
+echo.
+
+:: =========================================================
+:: 1. Load environment
+:: =========================================================
+
+if not exist "%~dp0env_setup.bat" (
+    echo [ERROR] env_setup.bat not found.
+    echo Run pre_build.bat first.
+    pause
+    exit /b 1
+)
+
+call "%~dp0env_setup.bat"
+
+if not defined VCPKG_ROOT (
+    echo [ERROR] VCPKG_ROOT is not defined.
+    echo Run pre_build.bat first.
+    pause
+    exit /b 1
+)
+
+if not defined ORACYN_VS_PATH (
+    echo [ERROR] ORACYN_VS_PATH is not defined.
+    echo Run pre_build.bat first.
+    pause
+    exit /b 1
+)
+
+:: =========================================================
+:: 2. Verify vcpkg
+:: =========================================================
 
 if not exist "%VCPKG_ROOT%\vcpkg.exe" (
-    echo [ERROR] vcpkg not found at %VCPKG_ROOT%. Run pre_build.bat first.
+    echo [ERROR] vcpkg.exe not found:
+    echo "%VCPKG_ROOT%\vcpkg.exe"
+    echo.
+    echo Run pre_build.bat first.
     pause
     exit /b 1
 )
 
-:: Locate Visual Studio
-set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
-set "VS_PATH="
-if exist "%VSWHERE%" (
-    for /f "usebackq tokens=*" %%i in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
-        set "VS_PATH=%%i"
+echo [OK] vcpkg:
+echo      "%VCPKG_ROOT%\vcpkg.exe"
+
+:: =========================================================
+:: 3. Verify Visual Studio
+:: =========================================================
+
+set "VS_PATH=%ORACYN_VS_PATH%"
+set "VCVARS=%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat"
+
+echo.
+echo [INFO] Visual Studio:
+echo        "%VS_PATH%"
+
+if not exist "%VCVARS%" (
+    echo [ERROR] vcvars64.bat was not found:
+    echo.
+    echo "%VCVARS%"
+    echo.
+    echo Run pre_build.bat again.
+    pause
+    exit /b 1
+)
+
+echo [OK] MSVC environment:
+echo      "%VCVARS%"
+
+:: =========================================================
+:: 4. Initialize MSVC
+:: =========================================================
+
+echo.
+echo [INFO] Initializing MSVC environment...
+
+call "%VCVARS%"
+
+if errorlevel 1 (
+    echo [ERROR] Failed to initialize MSVC.
+    pause
+    exit /b 1
+)
+
+where cl.exe >nul 2>&1
+
+if errorlevel 1 (
+    echo [ERROR] cl.exe was not found after initializing MSVC.
+    pause
+    exit /b 1
+)
+
+echo [OK] MSVC compiler:
+where cl.exe
+
+:: =========================================================
+:: 5. Verify Ninja
+:: =========================================================
+
+echo.
+echo [INFO] Checking Ninja...
+
+where ninja.exe >nul 2>&1
+
+if errorlevel 1 (
+    echo [ERROR] Ninja was not found.
+    echo Run pre_build.bat first.
+    pause
+    exit /b 1
+)
+
+echo [OK] Ninja:
+where ninja.exe
+
+:: =========================================================
+:: 6. Clean build if requested
+:: =========================================================
+
+if /i "%~1"=="clean" (
+    echo.
+    echo [INFO] Removing build directory...
+
+    if exist "build" (
+        rmdir /s /q "build"
     )
+
+    if exist "build" (
+        echo [ERROR] Failed to remove build directory.
+        pause
+        exit /b 1
+    )
+
+    echo [OK] Build directory removed.
 )
 
-if not defined VS_PATH (
-    echo [ERROR] No Visual Studio C++ workload found. Run pre_build.bat first.
+:: =========================================================
+:: 7. Configure with CMake
+:: =========================================================
+
+echo.
+echo =========================================================
+echo Configuring Oracyn
+echo =========================================================
+echo.
+
+cmake ^
+    -S . ^
+    -B build ^
+    -G Ninja ^
+    -DCMAKE_BUILD_TYPE=Debug ^
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
+    "-DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake" ^
+    -DVCPKG_TARGET_TRIPLET=x64-windows
+
+if errorlevel 1 (
+    echo.
+    echo [ERROR] CMake configuration failed.
     pause
     exit /b 1
 )
 
-:: Initialize MSVC environment
-call "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" x64
+:: =========================================================
+:: 8. Build
+:: =========================================================
 
-:: Locate Ninja executable
-set "NINJA_EXE="
-where ninja >nul 2>&1
-if %ERRORLEVEL% equ 0 (
-    for /f "tokens=*" %%i in ('where ninja') do set "NINJA_EXE=%%i"
-) else if exist "%VS_PATH%\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe" (
-    set "NINJA_EXE=%VS_PATH%\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
-)
+echo.
+echo =========================================================
+echo Building Oracyn
+echo =========================================================
+echo.
 
-if not defined NINJA_EXE (
-    echo [ERROR] Ninja executable not found.
-    pause
-    exit /b 1
-)
+cmake --build build --parallel
 
-:: Clean prior failed build state
-if exist "build" rmdir /s /q "build"
-
-:: Configure
-cmake -B build -S . -G "Ninja" ^
-  -DCMAKE_MAKE_PROGRAM="%NINJA_EXE%" ^
-  -DCMAKE_BUILD_TYPE=Debug ^
-  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
-  -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" ^
-  -DVCPKG_TARGET_TRIPLET=x64-windows
-
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] CMake configure failed.
-    pause
-    exit /b %ERRORLEVEL%
-)
-
-:: Build
-cmake --build build
-if %ERRORLEVEL% neq 0 (
+if errorlevel 1 (
+    echo.
     echo [ERROR] Build failed.
     pause
-    exit /b %ERRORLEVEL%
+    exit /b 1
 )
 
-echo [SUCCESS] Build completed successfully.
+:: =========================================================
+:: 9. Success
+:: =========================================================
+
+echo.
+echo =========================================================
+echo [SUCCESS] Oracyn built successfully.
+echo =========================================================
+echo.
+
 pause
+exit /b 0
