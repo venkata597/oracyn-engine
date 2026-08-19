@@ -117,12 +117,6 @@ Mesh MeshLoader::_construct_mesh(cgltf_mesh* mesh){
             }
             p.vertices.push_back(v);
         }
-        std::cout << "mesh:" << m.name << " vertex count:" << p.vertices.size() << std::endl;
-                for(int dbg = 0; dbg < 3 && dbg < (int)p.vertices.size(); dbg++){
-                    auto& v = p.vertices[dbg];
-                    std::cout << "  vtx[" << dbg << "] pos:(" << v.position.x << ","
-                               << v.position.y << "," << v.position.z << ")" << std::endl;
-                }
         p.material_index = primitive->material ? static_cast<uint32_t>(primitive->material - _current_model_data->materials) : UINT32_MAX;
 
         m.primitives.push_back(p);

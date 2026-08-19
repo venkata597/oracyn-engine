@@ -9,22 +9,17 @@ void Backend::GPUMesh::makeMesh(Mesh m,unsigned int ibid){
 
         prim.vao.createVAO();
         prim.vao.bind();
-        std::cout << "after VAO bind, err:" << glGetError() << std::endl;
 
         prim.vb.create();
         prim.vb.bind();
         prim.vb.setData(m.primitives.at(pc).vertices);
-        std::cout << "after VBO setData, err:" << glGetError()
-                          << " vertex count:" << m.primitives.at(pc).vertices.size() << std::endl;
 
         prim.ib.create();
         prim.ib.bind();
         prim.ib.setData(m.primitives.at(pc).indices);
-        std::cout << "after IBO setData, err:" << glGetError() << std::endl;
-
 
         prim.vao.setAttribPointers();
-         std::cout << "after setAttribPointers, err:" << glGetError() << std::endl;
+
 
         glBindBuffer(GL_ARRAY_BUFFER,ibid);
         prim.vao.setInstanceAttribPointers();
@@ -85,40 +80,6 @@ std::vector<Backend::GPUNode> Backend::GPUScene::_construct_scene_recur(const st
         node.localTransform = local;
         node.globalTransform = global;
         node.nodeUBO.data.globalTransform = global;
-        std::cout << "CPU globalTransform full matrix:\n";
-        for(int row = 0; row < 4; row++){
-            std::cout << "  " << global[0][row] << ", " << global[1][row] << ", "
-                       << global[2][row] << ", " << global[3][row] << std::endl;
-        }
-
-        std::cout << "== node hasMesh:" << node.hasGPUMesh
-                  << " children:" << scene_comp.children.size() << " ==\n"
-                  << " local  T:(" << local[3][0] << "," << local[3][1] << "," << local[3][2] << ")"
-                  << " raw translate:(" << scene_comp.localTransform.translate.x << ","
-                                          << scene_comp.localTransform.translate.y << ","
-                                          << scene_comp.localTransform.translate.z << ")\n"
-                  << " global T:(" << global[3][0] << "," << global[3][1] << "," << global[3][2] << ")"
-                  << " parent T:(" << globalTransform[3][0] << "," << globalTransform[3][1] << "," << globalTransform[3][2] << ")"
-                  << std::endl;
-
-        std::cout << "hasMatrix:" << scene_comp.localTransform.hasMatrix;
-        if(scene_comp.localTransform.hasMatrix){
-            auto& m = scene_comp.localTransform.transform;
-            std::cout << " matrix col0:(" << m[0][0] << "," << m[0][1] << "," << m[0][2] << ")"
-                       << " col1:(" << m[1][0] << "," << m[1][1] << "," << m[1][2] << ")"
-                       << " col2:(" << m[2][0] << "," << m[2][1] << "," << m[2][2] << ")";
-        }
-        std::cout << std::endl;
-
-        if(scene_comp.mesh.hasMesh){
-            // ...existing meshIndex assignment...
-            std::cout << " meshIndex:" << node.meshIndex
-                      << " primCount:" << gMeshes[node.meshIndex].mesh.size();
-            for(auto& prim : gMeshes[node.meshIndex].mesh){
-                std::cout << " indices:" << prim.indices_count;
-            }
-            std::cout << std::endl;
-        }
 
         if(scene_comp.children.size()>0){
             node.child_nodes =

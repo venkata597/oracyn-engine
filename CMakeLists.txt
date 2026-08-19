@@ -12,6 +12,7 @@ find_package(SDL2 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(Vulkan REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 add_executable(engine ${SOURCES})
@@ -22,4 +23,5 @@ target_link_libraries(engine PRIVATE
     glm::glm
     OpenGL::GL
     GLEW::GLEW
+    Vulkan::Vulkan
 )

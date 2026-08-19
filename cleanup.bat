@@ -170,6 +170,7 @@ echo.
 echo   VCPKG_ROOT
 echo   VCPKG_DISABLE_METRICS
 echo   ORACYN_VS_PATH
+echo   VULKAN_SDK
 echo.
 
 choice /C YN /N /M "Remove these user environment variables? [Y/N]: "
@@ -205,6 +206,14 @@ if errorlevel 2 (
         echo [OK] Removed ORACYN_VS_PATH.
     )
 
+    reg delete "HKCU\Environment" /v VULKAN_SDK /f >nul 2>&1
+
+    if errorlevel 1 (
+        echo [SKIP] VULKAN_SDK not found.
+    ) else (
+        echo [OK] Removed VULKAN_SDK.
+    )
+
     echo.
     echo [INFO] Environment cleanup complete.
     echo [INFO] Open terminals will retain their old environment.
@@ -212,7 +221,48 @@ if errorlevel 2 (
 )
 
 :: =========================================================
-:: 4. Git
+:: 4. Vulkan SDK
+:: =========================================================
+
+echo.
+echo =========================================================
+echo Vulkan SDK
+echo =========================================================
+echo.
+
+if defined VULKAN_SDK (
+    echo Vulkan SDK detected at:
+    echo.
+    echo   "%VULKAN_SDK%"
+    echo.
+    echo WARNING:
+    echo Uninstalling Vulkan SDK will remove LunarG tools, validation layers,
+    echo and header components required for Vulkan development.
+    echo.
+
+    choice /C YN /N /M "Uninstall Vulkan SDK? [Y/N]: "
+
+    if errorlevel 2 (
+        echo [KEEP] Vulkan SDK was kept.
+    ) else (
+        echo.
+        echo [INFO] Uninstalling Vulkan SDK...
+
+        winget uninstall --id LunarG.VulkanSDK -e
+
+        if errorlevel 1 (
+            echo [ERROR] Failed to uninstall Vulkan SDK via winget.
+            echo You may need to run the uninstaller manually from "%VULKAN_SDK%".
+        ) else (
+            echo [OK] Vulkan SDK uninstalled.
+        )
+    )
+) else (
+    echo [INFO] VULKAN_SDK is not set in environment variables.
+)
+
+:: =========================================================
+:: 5. Git
 :: =========================================================
 
 echo.
@@ -251,7 +301,7 @@ if errorlevel 1 (
 )
 
 :: =========================================================
-:: 5. CMake
+:: 6. CMake
 :: =========================================================
 
 echo.
@@ -290,7 +340,7 @@ if errorlevel 1 (
 )
 
 :: =========================================================
-:: 6. Ninja
+:: 7. Ninja
 :: =========================================================
 
 echo.
@@ -327,8 +377,9 @@ if errorlevel 1 (
         )
     )
 )
+
 :: =========================================================
-:: 7. Visual Studio
+:: 8. Visual Studio
 :: =========================================================
 
 echo.
@@ -392,7 +443,7 @@ if errorlevel 2 (
 )
 
 :: =========================================================
-:: 8. Finished
+:: 9. Finished
 :: =========================================================
 
 :finished

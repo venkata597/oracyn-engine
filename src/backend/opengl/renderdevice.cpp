@@ -68,7 +68,6 @@ void Backend::GLRenderDevice::submitState(RenderState&& state){
 }
 
 void Backend::GLRenderDevice::_draw_node(GPUNode& node,GPUScene& scene,std::vector<GPUMaterial>& materials,std::vector<glm::mat4>& eTransforms){
-    std::cout << "DRAW CALL - hasMesh:" << node.hasGPUMesh << " meshIndex:" << node.meshIndex << std::endl;
     node.nodeUBO.bindUniformBufferObject();
     node.nodeUBO.updateUniformBufferData();
 

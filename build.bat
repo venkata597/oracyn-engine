@@ -52,7 +52,7 @@ echo [OK] vcpkg:
 echo      "%VCPKG_ROOT%\vcpkg.exe"
 
 :: =========================================================
-:: 3. Verify Visual Studio
+:: 3. Verify Visual Studio & MSVC
 :: =========================================================
 
 set "VS_PATH=%ORACYN_VS_PATH%"
@@ -102,7 +102,36 @@ echo [OK] MSVC compiler:
 where cl.exe
 
 :: =========================================================
-:: 5. Verify Ninja
+:: 5. Verify Vulkan SDK & OpenGL Environment
+:: =========================================================
+
+echo.
+echo [INFO] Verifying Graphics SDKs (Vulkan & OpenGL)...
+
+if defined VULKAN_SDK (
+    if exist "%VULKAN_SDK%\Include\vulkan\vulkan.h" (
+        echo [OK] Vulkan SDK:
+        echo      "%VULKAN_SDK%"
+    ) else (
+        echo [WARNING] VULKAN_SDK environment variable is set, but vulkan.h was not found.
+    )
+) else (
+    echo [INFO] VULKAN_SDK is not explicitly set; CMake will attempt to locate system Vulkan drivers/headers.
+)
+
+where opengl32.lib >nul 2>&1
+if errorlevel 1 (
+    if exist "%WindowsSdkDir%Lib\%WindowsSDKLibVersion%um\x64\opengl32.lib" (
+        echo [OK] OpenGL 32-bit/64-bit import library located in Windows SDK.
+    ) else (
+        echo [INFO] OpenGL library will be resolved via MSVC / Windows SDK defaults.
+    )
+) else (
+    echo [OK] OpenGL library found in PATH/SDK.
+)
+
+:: =========================================================
+:: 6. Verify Ninja
 :: =========================================================
 
 echo.
@@ -121,7 +150,7 @@ echo [OK] Ninja:
 where ninja.exe
 
 :: =========================================================
-:: 6. Clean build if requested
+:: 7. Clean build if requested
 :: =========================================================
 
 if /i "%~1"=="clean" (
@@ -142,14 +171,19 @@ if /i "%~1"=="clean" (
 )
 
 :: =========================================================
-:: 7. Configure with CMake
+:: 8. Configure with CMake
 :: =========================================================
 
 echo.
 echo =========================================================
-echo Configuring Oracyn
+echo Configuring Oracyn (OpenGL + Vulkan)
 echo =========================================================
 echo.
+
+set "CMAKE_VULKAN_ARG="
+if defined VULKAN_SDK (
+    set "CMAKE_VULKAN_ARG=-DVULKAN_SDK=""%VULKAN_SDK%"""
+)
 
 cmake ^
     -S . ^
@@ -158,7 +192,8 @@ cmake ^
     -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
     "-DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake" ^
-    -DVCPKG_TARGET_TRIPLET=x64-windows
+    -DVCPKG_TARGET_TRIPLET=x64-windows ^
+    %CMAKE_VULKAN_ARG%
 
 if errorlevel 1 (
     echo.
@@ -168,7 +203,7 @@ if errorlevel 1 (
 )
 
 :: =========================================================
-:: 8. Build
+:: 9. Build
 :: =========================================================
 
 echo.
@@ -187,7 +222,7 @@ if errorlevel 1 (
 )
 
 :: =========================================================
-:: 9. Success
+:: 10. Success
 :: =========================================================
 
 echo.
