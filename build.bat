@@ -102,22 +102,11 @@ echo [OK] MSVC compiler:
 where cl.exe
 
 :: =========================================================
-:: 5. Verify Vulkan SDK & OpenGL Environment
+:: 5. Verify OpenGL Environment
 :: =========================================================
 
 echo.
-echo [INFO] Verifying Graphics SDKs (Vulkan & OpenGL)...
-
-if defined VULKAN_SDK (
-    if exist "%VULKAN_SDK%\Include\vulkan\vulkan.h" (
-        echo [OK] Vulkan SDK:
-        echo      "%VULKAN_SDK%"
-    ) else (
-        echo [WARNING] VULKAN_SDK environment variable is set, but vulkan.h was not found.
-    )
-) else (
-    echo [INFO] VULKAN_SDK is not explicitly set; CMake will attempt to locate system Vulkan drivers/headers.
-)
+echo [INFO] Verifying OpenGL Environment...
 
 where opengl32.lib >nul 2>&1
 if errorlevel 1 (
@@ -176,14 +165,9 @@ if /i "%~1"=="clean" (
 
 echo.
 echo =========================================================
-echo Configuring Oracyn (OpenGL + Vulkan)
+echo Configuring Oracyn (OpenGL)
 echo =========================================================
 echo.
-
-set "CMAKE_VULKAN_ARG="
-if defined VULKAN_SDK (
-    set "CMAKE_VULKAN_ARG=-DVULKAN_SDK=""%VULKAN_SDK%"""
-)
 
 cmake ^
     -S . ^
@@ -192,8 +176,7 @@ cmake ^
     -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
     "-DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake" ^
-    -DVCPKG_TARGET_TRIPLET=x64-windows ^
-    %CMAKE_VULKAN_ARG%
+    -DVCPKG_TARGET_TRIPLET=x64-windows
 
 if errorlevel 1 (
     echo.

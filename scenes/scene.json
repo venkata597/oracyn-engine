@@ -2,6 +2,66 @@
   "entities": [
     {
       "type": "asset",
+      "name": "AntiqueCamera",
+      "modelpath": "AntiqueCamera",
+      "has_instances": true,
+      "instance_count": 1,
+      "instances": [
+        {
+          "id": 101,
+          "translate": [0.5,0,0],
+          "rotate": [-0.5, -0.5, 0.5, 0.5],
+          "scale": [0.075,0.075,0.075]
+        },{
+          "id": 101,
+          "translate": [1.0,0,0],
+          "rotate": [-0.5, -0.5, 0.5, 0.5],
+          "scale": [0.075,0.075,0.075]
+        },{
+          "id": 101,
+          "translate": [1.5,0,0],
+          "rotate": [-0.5, -0.5, 0.5, 0.5],
+          "scale": [0.075,0.075,0.075]
+        },{
+          "id": 101,
+          "translate": [2.0,0,0],
+          "rotate": [-0.5, -0.5, 0.5, 0.5],
+          "scale": [0.075,0.075,0.075]
+        }
+      ]
+    },
+    {
+      "type": "asset",
+      "name": "flighthelmet",
+      "modelpath": "flighthelmet",
+      "has_instances": true,
+      "instance_count": 1,
+      "instances": [
+        {
+          "id": 101,
+          "translate": [2.5,0,0],
+          "rotate": [-0.7071, 0.0, 0.0, 0.7071],
+          "scale": [1,1,1]
+        },{
+          "id": 101,
+          "translate": [3,0,0],
+          "rotate": [-0.7071, 0.0, 0.0, 0.7071],
+          "scale": [1,1,1]
+        },{
+          "id": 101,
+          "translate": [3.5,0,0],
+          "rotate": [-0.7071, 0.0, 0.0, 0.7071],
+          "scale": [1,1,1]
+        },{
+          "id": 101,
+          "translate": [4,0,0],
+          "rotate": [-0.7071, 0.0, 0.0, 0.7071],
+          "scale": [1,1,1]
+        }
+      ]
+    },
+    {
+      "type": "asset",
       "name": "DamagedHelmet",
       "modelpath": "DamagedHelmet",
       "has_instances": true,
@@ -11,7 +71,22 @@
           "id": 101,
           "translate": [0,0,0],
           "rotate": [0.0, 0.0, 0.0, 1.0],
-          "scale": [0.5,0.5,0.5]
+          "scale": [0.2,0.2,0.2]
+        },{
+          "id": 101,
+          "translate": [-0.5,0,0],
+          "rotate": [0.0, 0.0, 0.0, 1.0],
+          "scale": [0.2,0.2,0.2]
+        },{
+          "id": 101,
+          "translate": [-1.0,0,0],
+          "rotate": [0.0, 0.0, 0.0, 1.0],
+          "scale": [0.2,0.2,0.2]
+        },{
+          "id": 101,
+          "translate": [-1.5,0,0],
+          "rotate": [0.0, 0.0, 0.0, 1.0],
+          "scale": [0.2,0.2,0.2]
         }
       ]
     }

@@ -1,8 +1,10 @@
 #include "../../include/windowing/window.hpp"
+#include <SDL.h>
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_mouse.h>
+#include <SDL_stdinc.h>
 #include <iostream>
 #include "../../include/resources/inputhandler.hpp"
 
@@ -60,10 +62,10 @@ void AppWindow::handleEvents(){
                 this->status = false;
                 break;
             case SDL_KEYUP:
-                input.keys[event.key.keysym.scancode] = true;
+                input.keys[event.key.keysym.scancode] = false;
                 break;
             case SDL_KEYDOWN:
-                input.keys[event.key.keysym.scancode] = false;
+                input.keys[event.key.keysym.scancode] = true;
                 break;
             case SDL_MOUSEMOTION:
                 input.mouse_delta_x = (float)event.motion.xrel;

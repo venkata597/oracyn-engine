@@ -1,7 +1,5 @@
 #include "../../../include/backend/resources/gl_mesh.hpp"
-#include <cstdint>
 #include <cstring>
-#include <iostream>
 
 void Backend::GPUMesh::makeMesh(Mesh m,unsigned int ibid){
     for(int pc = 0;pc<m.primitives.size();pc++){

@@ -5,10 +5,10 @@ cd /d "%~dp0"
 
 echo.
 echo =========================================================
-echo   ORACYN - PRE-BUILD ENVIRONMENT SETUP
+echo    ORACYN - PRE-BUILD ENVIRONMENT SETUP
 echo =========================================================
 echo.
-echo   Preparing the system for building Oracyn (Vulkan).
+echo    Preparing the system for building Oracyn.
 echo.
 
 :: =========================================================
@@ -16,7 +16,7 @@ echo.
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [1/10] Administrator privileges
+echo [1/9] Administrator privileges
 echo ---------------------------------------------------------
 echo.
 
@@ -41,7 +41,7 @@ echo.
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [2/10] Windows Package Manager
+echo [2/9] Windows Package Manager
 echo ---------------------------------------------------------
 echo.
 
@@ -66,7 +66,7 @@ echo.
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [3/10] Git
+echo [3/9] Git
 echo ---------------------------------------------------------
 echo.
 
@@ -131,7 +131,7 @@ echo.
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [4/10] CMake
+echo [4/9] CMake
 echo ---------------------------------------------------------
 echo.
 
@@ -196,7 +196,7 @@ echo.
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [5/10] Ninja
+echo [5/9] Ninja
 echo ---------------------------------------------------------
 echo.
 
@@ -257,67 +257,11 @@ if errorlevel 1 (
 echo.
 
 :: =========================================================
-:: 5. Install / Verify Vulkan SDK
+:: 5. Locate Visual Studio Installer / vswhere
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [6/10] Vulkan SDK
-echo ---------------------------------------------------------
-echo.
-
-echo [INFO] Checking Vulkan SDK...
-
-if not defined VULKAN_SDK (
-    echo [INFO] VULKAN_SDK environment variable is not set.
-    echo [INFO] Installing LunarG Vulkan SDK via winget...
-    echo.
-
-    winget install ^
-        --id LunarG.VulkanSDK ^
-        -e ^
-        --source winget ^
-        --accept-source-agreements ^
-        --accept-package-agreements
-
-    if errorlevel 1 (
-        echo.
-        echo [ERROR] Failed to install Vulkan SDK.
-        echo [ERROR] Please install it manually from https://vulkan.lunarg.com/
-        echo.
-        pause
-        exit /b 1
-    )
-
-    echo.
-    echo [INFO] Vulkan SDK installed. Restarting the script may be required for environment variables to apply.
-)
-
-if not defined VULKAN_SDK (
-    if exist "C:\VulkanSDK" (
-        for /f "delims=" %%D in ('dir /b /ad /o-n "C:\VulkanSDK" 2^>nul') do (
-            if not defined VULKAN_SDK set "VULKAN_SDK=C:\VulkanSDK\%%D"
-        )
-    )
-)
-
-if not defined VULKAN_SDK (
-    echo [ERROR] VULKAN_SDK directory could not be located.
-    echo [ERROR] Please set the VULKAN_SDK environment variable manually.
-    echo.
-    pause
-    exit /b 1
-)
-
-echo [OK] Vulkan SDK located:
-echo      "%VULKAN_SDK%"
-echo.
-
-:: =========================================================
-:: 6. Locate Visual Studio Installer / vswhere
-:: =========================================================
-
-echo ---------------------------------------------------------
-echo [7/10] Visual Studio 2022
+echo [6/9] Visual Studio 2022
 echo ---------------------------------------------------------
 echo.
 
@@ -353,7 +297,7 @@ if not exist "%VSWHERE%" (
     echo [ERROR] vswhere.exe is still missing after Visual Studio installation.
     echo.
     echo Expected:
-    echo    "%VSWHERE%"
+    echo     "%VSWHERE%"
     echo.
     pause
     exit /b 1
@@ -411,11 +355,11 @@ echo [OK] MSVC compiler initialized.
 echo.
 
 :: =========================================================
-:: 7. Locate / Install vcpkg
+:: 6. Locate / Install vcpkg
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [8/10] vcpkg
+echo [7/9] vcpkg
 echo ---------------------------------------------------------
 echo.
 
@@ -454,7 +398,7 @@ if not exist "%VCPKG_ROOT%\vcpkg.exe" (
 echo.
 
 :: =========================================================
-:: 8. Generate env_setup.bat
+:: 7. Generate env_setup.bat
 :: =========================================================
 
 echo [INFO] Generating env_setup.bat...
@@ -463,7 +407,6 @@ echo [INFO] Generating env_setup.bat...
     echo @echo off
     echo set "VCPKG_ROOT=%VCPKG_ROOT%"
     echo set "VCPKG_DISABLE_METRICS=1"
-    echo set "VULKAN_SDK=%VULKAN_SDK%"
     echo set "ORACYN_VS_PATH=%VS_PATH%"
 ) > "%~dp0env_setup.bat"
 
@@ -477,16 +420,15 @@ echo [OK] env_setup.bat created.
 echo.
 
 :: =========================================================
-:: 9. Final Verification
+:: 8. Final Verification
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [9/10] Verification
+echo [8/9] Verification
 echo ---------------------------------------------------------
 echo.
 
 echo [INFO] Visual Studio: "%VS_PATH%"
-echo [INFO] Vulkan SDK:    "%VULKAN_SDK%"
 echo [INFO] Git:
 "%GIT_EXE%" --version
 echo [INFO] CMake:
@@ -496,15 +438,15 @@ echo [INFO] Ninja:
 echo.
 
 :: =========================================================
-:: 10. Complete
+:: 9. Complete
 :: =========================================================
 
 echo ---------------------------------------------------------
-echo [10/10] Setup complete
+echo [9/9] Setup complete
 echo ---------------------------------------------------------
 echo.
 echo =========================================================
-echo    ORACYN VULKAN ENVIRONMENT READY
+echo     ORACYN ENVIRONMENT READY
 echo =========================================================
 echo.
 echo Run build.bat to configure and build Oracyn.
