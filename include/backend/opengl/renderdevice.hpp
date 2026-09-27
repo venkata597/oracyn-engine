@@ -10,8 +10,10 @@
 
 namespace Backend{
     class GLRenderDevice{
-        friend class RenderContext;
     private:
+
+        std::unordered_map<unsigned int,GPUAssetData> gpuResourceMap;
+
         void _init_device();
         void _make_shaders();
         void _set_location_bindings();
@@ -27,6 +29,10 @@ namespace Backend{
     public:
         GLRenderDevice();
         const unsigned int& getInstanceBufferID() {return ib.getID();}
+
+        void uploadAsset(unsigned int id,GPUAssetData data);
+        const GPUAssetData& getAsset(unsigned int id) const;
+
         void clearScreen();
         void submitState(RenderState&& state);
         void drawScene();

@@ -4,12 +4,12 @@
 #include <stdexcept>
 #include <vector>
 
-std::unordered_map<std::string,unsigned int> AssetMap::map;
+std::unordered_map<std::string,unsigned int> AssetLoader::map;
 
 unsigned int AssetLoader::_id = 100;
 
-unsigned int AssetMap::getAssetID(std::string aname){
-    auto it = AssetMap::map.find(aname);
+unsigned int AssetLoader::getAssetID(std::string aname){
+    auto it = AssetLoader::map.find(aname);
     if(it == map.end()){
         throw std::runtime_error("[ORACYN (ASSET)]: Asset not found");
     }
@@ -28,11 +28,11 @@ std::vector<std::string> AssetLoader::_get_file_contents(std::string path){
 }
 
 void AssetLoader::_register_asset(std::string name){
-    AssetMap::map[name] = _id++;
+    AssetLoader::map[name] = _id++;
 }
 
 void AssetLoader::loadAsset(std::string aname){
-    if(AssetMap::map.find(aname) != AssetMap::map.end()){
+    if(AssetLoader::map.find(aname) != AssetLoader::map.end()){
         return;
     }
     path = assetpath + aname + "/";
@@ -64,5 +64,10 @@ void AssetLoader::loadAsset(std::string aname){
 
 
     _register_asset(aname);
-    asset_map[AssetMap::getAssetID(aname)] = std::move(ad);
+    asset_map[getAssetID(aname)] = std::move(ad);
+}
+
+void AssetLoader::loadSkyBox(std::string skybox_path){
+    SkyBoxData skybox;
+    skybox.data = std::move(materialloader.constructSkyBox(assetpath+skybox_path));
 }

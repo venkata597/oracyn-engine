@@ -39,7 +39,7 @@ void AppWindow::_create_window(const char* title){
     SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
-AppWindow::AppWindow(const char* title){
+AppWindow::AppWindow(const char* title,InputHandler& input): input_ref(input) {
     if(SDL_Init(SDL_INIT_VIDEO) < 0){
         std::cout << "[ORACYN (WINDOWING)]: Unable to Initialize SDL_VIDEO" << SDL_GetError() << '\n';
         this->status = false;
@@ -62,14 +62,14 @@ void AppWindow::handleEvents(){
                 this->status = false;
                 break;
             case SDL_KEYUP:
-                input.keys[event.key.keysym.scancode] = false;
+                input_ref.keys[event.key.keysym.scancode] = false;
                 break;
             case SDL_KEYDOWN:
-                input.keys[event.key.keysym.scancode] = true;
+                input_ref.keys[event.key.keysym.scancode] = true;
                 break;
             case SDL_MOUSEMOTION:
-                input.mouse_delta_x = (float)event.motion.xrel;
-                input.mouse_delta_y = (float)event.motion.yrel;
+                input_ref.mouse_delta_x = (float)event.motion.xrel;
+                input_ref.mouse_delta_y = (float)event.motion.yrel;
                 break;
         }
     }

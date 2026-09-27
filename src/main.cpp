@@ -1,15 +1,14 @@
 #include <SDL2/SDL_timer.h>
-#include <iostream>
-#include <iterator>
 #include "../include/oracyn.hpp"
 
 
 int main(int argc,char* argv[]){
     (void)argc;(void)argv;
-    AppWindow window("Test Engine");
+    InputHandler input;
+    AppWindow window("Test Engine",input);
     Scene scene;
     scene.loadScene("scenes/scene.json");
-    Camera camera;
+    Camera camera(input);
     Renderer renderer;
     Backend::GLRenderDevice render_device;
     RenderContext context;
@@ -36,6 +35,7 @@ int main(int argc,char* argv[]){
         render_device.drawScene();
 
         window.swapBuffers();
+        input.resetMouseDelta();
     }
     return 0;
 }

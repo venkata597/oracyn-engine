@@ -26,7 +26,7 @@ void Renderer::draw(const SceneMap& map){
 }
 
 void Renderer::endFrame(){
-    input.resetMouseDelta();
+
 }
 
 RenderState Renderer::getState(){

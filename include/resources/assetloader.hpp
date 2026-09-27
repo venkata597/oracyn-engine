@@ -12,22 +12,20 @@ struct cgltf_data;
 class AssetLoader;
 class RenderContext;
 
-class AssetMap{
-private:
-    static std::unordered_map<std::string,unsigned int> map;
-public:
-    static unsigned int getAssetID(std::string aname);
-    friend class AssetLoader;
-};
-
 struct AssetData{
     std::vector<NodeData> model;
     std::vector<MaterialData> materials;
 };
 
+struct SkyBoxData{
+    SkyBoxMaterials data;
+};
+
 class AssetLoader{
     friend class RenderContext;
 private:
+
+    static std::unordered_map<std::string,unsigned int> map;
 
     std::string assetpath = "assets/";
     std::string path;
@@ -45,8 +43,11 @@ private:
 
     std::unordered_map<unsigned int,AssetData> asset_map;
 
+
 public:
+    void loadSkyBox(std::string skybox_path);
     void loadAsset(std::string assetname);
+    unsigned int getAssetID(std::string aname);
     const AssetData& getAssetDataByID(unsigned int id){ return asset_map.at(id);}
 
 

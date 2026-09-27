@@ -1,4 +1,5 @@
 #pragma once
+#include "../resources/inputhandler.hpp"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
@@ -15,12 +16,14 @@ private:
     bool status = true;
     bool resized = false;
 
+    InputHandler& input_ref;
+
     SDL_GLContext glContext;
 private:
     void _create_window(const char* title);
 
 public:
-    AppWindow(const char* title);
+    AppWindow(const char* title,InputHandler& input);
     ~AppWindow();
 
     bool isOpen();

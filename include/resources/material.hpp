@@ -66,10 +66,20 @@ struct MaterialData{
     bool doubleSided;
 };
 
+struct SkyBoxMaterials{
+    Texture right;
+    Texture left;
+    Texture top;
+    Texture bottom;
+    Texture front;
+    Texture back;
+};
+
 class MaterialLoader{
 private:
 public:
     std::vector<MaterialData> constructMaterial(cgltf_data* data,std::string p);
+    SkyBoxMaterials constructSkyBox(std::string skybox_path);
 
     MaterialLoader();
     MaterialLoader(const MaterialLoader&) = delete;

@@ -10,10 +10,14 @@ using json = nlohmann::json;
 
 using SceneMap = std::unordered_map<Entity,std::vector<Transform>,EntityHasher>;
 
+struct SceneObject{
+
+};
+
+
 class Scene{
     friend class RenderContext;
 private:
-
     AssetLoader loader;
     std::vector<Entity> entities;
     SceneMap instances;

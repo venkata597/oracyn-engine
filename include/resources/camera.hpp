@@ -8,6 +8,9 @@
 
 class Camera{
 private:
+
+    InputHandler& input_ref;
+
     glm::vec3 _camera_pos = glm::vec3(0.0f,0.0f,3.0f);
     glm::vec3 _camera_front = glm::vec3(0.0f,0.0f,-1.0f);
     glm::vec3 _camera_up = glm::vec3(0.0f,1.0f,0.0f);
@@ -29,6 +32,9 @@ private:
 private:
     void _update_camera(float delta_time);
 public:
+
+    Camera(InputHandler& input);
+
     void update(float delta_time);
     const glm::mat4& getViewMatrix() {return view;}
     const glm::mat4& getProjectionMatrix() {return projection;}

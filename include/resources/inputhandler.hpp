@@ -11,6 +11,3 @@ public:
 
     void resetMouseDelta() {mouse_delta_x = 0.0f;mouse_delta_y=0.0f;}
 };
-
-
-extern InputHandler input;

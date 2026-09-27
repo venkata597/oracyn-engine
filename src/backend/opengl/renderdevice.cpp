@@ -1,7 +1,5 @@
 #include "../../../include/backend/opengl/renderdevice.hpp"
-#include <cstdint>
 #include <iostream>
-#include <stdexcept>
 #include <vector>
 
 void Backend::GLRenderDevice::_init_device(){
@@ -58,6 +56,10 @@ Backend::GLRenderDevice::GLRenderDevice(){
     ib.create();
 }
 
+void Backend::GLRenderDevice::uploadAsset(unsigned int id,GPUAssetData data){
+    gpuResourceMap[id] = std::move(data);
+}
+
 void Backend::GLRenderDevice::clearScreen(){
     glClearColor(0.2f,0.3f,0.3f,1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -101,7 +103,7 @@ void Backend::GLRenderDevice::drawScene(){
 
 
     for(const auto& cmd: state.draw_queue){
-        auto& [scene,materials] = RenderContext::gpuResourceMap.at(cmd.assetID);
+        auto& [scene,materials] = gpuResourceMap.at(cmd.assetID);
 
         std::vector<glm::mat4> entityTransforms;
         entityTransforms.reserve(cmd.transforms.size());

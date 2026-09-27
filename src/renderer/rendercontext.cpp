@@ -1,8 +1,5 @@
 #include "../../include/renderer/rendercontext.hpp"
 #include "../../include/backend/opengl/renderdevice.hpp"
-#include <iostream>
-
-std::unordered_map<unsigned int,GPUAssetData> RenderContext::gpuResourceMap;
 
 void RenderContext::uploadToGPU(Scene& scene,Backend::GLRenderDevice& render_device){
     for(auto& [id,asset_data]: scene.loader.asset_map){
@@ -16,6 +13,6 @@ void RenderContext::uploadToGPU(Scene& scene,Backend::GLRenderDevice& render_dev
             gpu_material.makeGPUMaterial(std::move(material));
             gpu_asset.gMaterials.push_back(std::move(gpu_material));
         }
-        gpuResourceMap[id] = std::move(gpu_asset);
+        render_device.uploadAsset(id,std::move(gpu_asset));
     }
 }

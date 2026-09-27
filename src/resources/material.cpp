@@ -143,6 +143,18 @@ std::vector<MaterialData> MaterialLoader::constructMaterial(cgltf_data* data,std
     return std::move(materials);
 }
 
+SkyBoxMaterials MaterialLoader::constructSkyBox(std::string skybox_path){
+    SkyBoxMaterials sb_d;
+    sb_d.right = std::move(loadTexture(skybox_path+"/right.png"));
+    sb_d.left = std::move(loadTexture(skybox_path+"/left.png"));
+    sb_d.top = std::move(loadTexture(skybox_path+"/top.png"));
+    sb_d.bottom = std::move(loadTexture(skybox_path+"/bottom.png"));
+    sb_d.front = std::move(loadTexture(skybox_path+"/front.png"));
+    sb_d.back = std::move(loadTexture(skybox_path+"/back.png"));
+
+    return sb_d;
+}
+
 MaterialLoader::MaterialLoader(){
     stbi_set_flip_vertically_on_load(false);
 }

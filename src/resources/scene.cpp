@@ -29,6 +29,7 @@ void Scene::loadScene(const std::string& filepath){
     file.close();
 
 
+    loader.loadSkyBox(root["skybox"]);
     for(const auto& entity: root["entities"]){
         loader.loadAsset(entity.value("modelpath",""));
         glm::vec3 trans,scale;
